@@ -7,8 +7,6 @@ namespace Pl8Mayhem;
 
 public partial class PlatesPlayer : AnimatedEntity
 {
-	[Net] private Glow Glow {get; set;}
-
 	[Net] public bool Alive { get; set; } = false;
 
 	[Net] public PlateEntity OwnedPlate { get; set; }
@@ -66,32 +64,32 @@ public partial class PlatesPlayer : AnimatedEntity
 	}
 
 	[BindComponent] public PawnController Controller { get; }
-	//[BindComponent] public PawnAnimator Animator { get; }
+	[BindComponent] public PawnAnimator Animator { get; }
 
 	public override Ray AimRay => new Ray( EyePosition, EyeRotation.Forward );
 
 	public override void Spawn()
 	{
-		Components.Create<PawnController>();
-		//Components.Create<PawnAnimator>();
 		SetModel( "models/citizen/citizen.vmdl" );
 		EnableDrawing = false;
 	}
 
 	public void Respawn()
 	{
+		Components.Create<PawnController>();
+		Components.Create<PawnAnimator>();
+		
 		EnableDrawing = true;
 		EnableHideInFirstPerson = true;
 		EnableShadowInFirstPerson = true;
 		
-		Components.Create<Glow>();
 		DressFromClient( Client );
 	}
 
 	[GameEvent.Tick.Server]
 	private void Tick()
 	{
-		if ( Position.z <= -100f && Alive)
+		if ( Position.z <= -1000f && Alive)
 		{
 			Alive = false;
 			Kill();
@@ -116,6 +114,7 @@ public partial class PlatesPlayer : AnimatedEntity
 		
 		Alive = false;
 		OwnedPlate?.Kill();
+		
 		//Pl8Mayhem.State?.OnPlayerDeath(this);
 	}
 
@@ -128,7 +127,6 @@ public partial class PlatesPlayer : AnimatedEntity
 
 	public void ResetValues(bool changeProperties = true)
 	{
-		SetGlow(false);
 		if ( !changeProperties )
 		{
 			return;
@@ -142,9 +140,8 @@ public partial class PlatesPlayer : AnimatedEntity
 	public override void Simulate( IClient cl )
 	{
 		SimulateRotation();
-		Controller?.Simulate(  );
-		//Animator?.Simulate();
-		//ActiveWeapon?.Simulate( cl );
+		Controller?.Simulate( cl );
+		Animator?.Simulate();
 		EyeLocalPosition = Vector3.Up * (64f * Scale);
 	}
 	
@@ -162,11 +159,12 @@ public partial class PlatesPlayer : AnimatedEntity
 
 		if ( IsThirdPerson )
 		{
+			Vector3 targetPos;
 			var pos = Position + Vector3.Up * 64;
 			var rot = Camera.Rotation * Rotation.FromAxis( Vector3.Up, -16 );
 
-			var distance = 80.0f * Scale;
-			var targetPos = pos + rot.Right * ((CollisionBounds.Mins.x + 50) * Scale);
+			float distance = 80.0f * Scale;
+			targetPos = pos + rot.Right * ((CollisionBounds.Mins.x + 50) * Scale);
 			targetPos += rot.Forward * -distance;
 
 			var tr = Trace.Ray( pos, targetPos )
@@ -209,14 +207,10 @@ public partial class PlatesPlayer : AnimatedEntity
 	
 	public override void BuildInput()
 	{
-		
-		DebugOverlay.ScreenText($"Input: {Input.AnalogMove} ", 1);
 		InputDirection = Input.AnalogMove;
 
 		if ( Input.StopProcessing )
 			return;
-		
-		DebugOverlay.ScreenText($"Input: {Input.AnalogMove} ", 2);
 
 		var look = Input.AnalogLook;
 
@@ -230,19 +224,7 @@ public partial class PlatesPlayer : AnimatedEntity
 		viewAngles.pitch = viewAngles.pitch.Clamp( -89f, 89f );
 		viewAngles.roll = 0f;
 		ViewAngles = viewAngles.Normal;
-		
-		Controller?.BuildInput();
 	}
-
-	public void SetGlow(bool visible, Color color = default)
-	{
-		if(color != default)
-		{
-			Glow.Color = color;
-		}
-		Glow.Enabled = visible;
-	}
-
 	private void SimulateRotation()
 	{
 		EyeRotation = ViewAngles.ToRotation();

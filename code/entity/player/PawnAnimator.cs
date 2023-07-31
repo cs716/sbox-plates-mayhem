@@ -2,11 +2,11 @@
 
 namespace Pl8Mayhem;
 
-public partial class PawnAnimator : EntityComponent<PlatesPlayer>, ISingletonComponent
+public class PawnAnimator : EntityComponent<PlatesPlayer>, ISingletonComponent
 {
 	public void Simulate()
 	{
-		/*var helper = new CitizenAnimationHelper( Entity );
+		var helper = new CitizenAnimationHelper( Entity );
 		helper.WithVelocity( Entity.Velocity );
 		helper.WithLookAt( Entity.EyePosition + Entity.EyeRotation.Forward * 100 );
 		helper.HoldType = CitizenAnimationHelper.HoldTypes.None;
@@ -15,6 +15,6 @@ public partial class PawnAnimator : EntityComponent<PlatesPlayer>, ISingletonCom
 		if ( Entity.Controller.HasEvent( "jump" ) )
 		{
 			helper.TriggerJump();
-		}*/
+		}
 	}
 }
