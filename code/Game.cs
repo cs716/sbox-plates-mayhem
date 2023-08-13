@@ -54,6 +54,12 @@ partial class PlatesGame : GameManager
 	[GameEvent.Tick]
 	public static void OnTick()
 	{
+		if ( Game.IsClient && State is EventState state)
+		{
+			var currentEvent = state.GetCurrentEvent();
+			DebugOverlay.ScreenText( $"Event: {currentEvent.Name} ({currentEvent.ShortName}) ({currentEvent.ClassName})", (int)DebugTextLocations.EventData );
+			DebugOverlay.ScreenText( $"Desc: {currentEvent.Description}", (int)DebugTextLocations.EventData + 1 );
+		}
 		State?.OnTick();
 	}
 

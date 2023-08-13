@@ -25,6 +25,9 @@ public sealed class PlayerSwapEvent : BaseEvent
 		Name = "Player Swap";
 		ShortName = "Player Swap";
 		
+		if ( Game.IsClient )
+			return;
+		
 		PlayerNames.Clear();
 		PlayerPairs.Clear();
 		EventOperationsComplete = false;

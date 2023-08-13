@@ -43,10 +43,5 @@ public abstract partial class BaseEvent : BaseNetworkable
 
 	public virtual void OnTick()
 	{
-		if ( Game.IsClient )
-		{
-			DebugOverlay.ScreenText( $"Event: {Name} ({ShortName}) ({ClassName})", (int)PlatesGame.DebugTextLocations.EventData );
-			DebugOverlay.ScreenText( $"Desc: {Description}", (int)PlatesGame.DebugTextLocations.EventData + 1 );
-		}
 	}
 }

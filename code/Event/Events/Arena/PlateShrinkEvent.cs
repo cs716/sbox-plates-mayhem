@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using PlatesGame.State.GameStates;
 using PlatesGame.util;
 using Sandbox;
 
@@ -13,9 +14,15 @@ public class PlateShrinkEvent : BaseEvent
 	private int PlatesImpacted;
 	private RealTimeUntil TimeUntilScale;
 	private bool ScaleCompleted;
+	private const float MinShrink = 0.4f;
+	private const float MaxShrink = 0.8f;
+
 	public override void OnEnter()
 	{
 		base.OnEnter();
+
+		if ( Game.IsClient )
+			return;
 
 		var livingPlates = PlateManager.Plates().Where( p => !p.IsDead ).OrderBy( x => Random.Shared.Double( 1, 100 ) ).ToList();
 		PlatesImpacted = Random.Shared.Int( MinAffected, Math.Clamp( livingPlates.Count, MinAffected, MaxAffected ) );
@@ -25,6 +32,7 @@ public class PlateShrinkEvent : BaseEvent
 		ShortName = "Shrink Plate";
 
 		TimeUntilScale = 5;
+		ScaleCompleted = false; 
 	}
 
 	public override void OnTick()
@@ -43,13 +51,16 @@ public class PlateShrinkEvent : BaseEvent
 
 			impactCount++;
 
-			var randomScale = Random.Shared.Int( 10, 90 );
-			if ( randomScale % 2 == 1 ) // Make it an even number
-				randomScale++;
+			var randomScale = Random.Shared.Float( MinShrink, MaxShrink );
 
 			plate.Shrink( randomScale );
+			Log.Info("Shrink: " + randomScale );
 		}
 
 		ScaleCompleted = true;
+		if ( PlatesGame.State is EventState state )
+		{
+			state.EndEventEarly = true;
+		}
 	}
 }

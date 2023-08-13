@@ -17,6 +17,11 @@ public class ArenaHighGravityEvent : BaseEvent
 		Name = "High Gravity";
 		ShortName = "High Gravity";
 		Description = "The gravity in the arena will be raised for everyone!";
+		
+
+		if ( Game.IsClient )
+			return;
+		
 		foreach (var player in Sandbox.Entity.All.OfType<PlatesPlayer>().Where( p => p.Alive  ))
 		{
 			player.Controller.Gravity += GameConfig.DefaultGravity * 0.3f;
@@ -26,6 +31,11 @@ public class ArenaHighGravityEvent : BaseEvent
 	public override void OnExit()
 	{
 		base.OnExit();
+		
+
+		if ( Game.IsClient )
+			return;
+		
 		foreach (var player in Sandbox.Entity.All.OfType<PlatesPlayer>().Where(p => p.Controller?.Gravity.AlmostEqual( GameConfig.DefaultGravity ) == false ))
 		{
 			player.Controller.Gravity = GameConfig.DefaultGravity;

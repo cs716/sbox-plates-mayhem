@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Linq;
 using PlatesGame.Entity.Player;
+using PlatesGame.Event;
 using PlatesGame.State.GameStates;
 using PlatesGame.util;
 using Sandbox;
 
 namespace PlatesGame.State
 {
-	public abstract class GameState : BaseNetworkable
+	public partial class GameState : BaseNetworkable
 	{
 		public virtual bool AllowPlayerJoins { get; init; } = false;
+
+		[Net] public BaseEvent CurrentEvent { get; set; }
 
 		public virtual void OnEnter()
 		{

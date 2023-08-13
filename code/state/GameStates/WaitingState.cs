@@ -71,7 +71,12 @@ public class WaitingState : GameState
 
 	private static void StartRound()
 	{
-		var gameStartPhase = new EventState();
-		PlatesGame.ChangeState( gameStartPhase );
+		PlatesGame.ChangeState( new CooldownState
+		{
+			AllowPlayerJoins = false,
+			HandleStateChanges = true,
+			NextStateTime = 5f,
+			NextState = new EventState()
+		});
 	}
 }
