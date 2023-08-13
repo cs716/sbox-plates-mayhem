@@ -1,6 +1,6 @@
 ﻿using Sandbox;
 
-namespace Pl8Mayhem;
+namespace PlatesGame.Entity.Player;
 
 public class PawnAnimator : EntityComponent<PlatesPlayer>, ISingletonComponent
 {
@@ -13,8 +13,6 @@ public class PawnAnimator : EntityComponent<PlatesPlayer>, ISingletonComponent
 		helper.IsGrounded = Entity.GroundEntity.IsValid();
 
 		if ( Entity.Controller.HasEvent( "jump" ) )
-		{
 			helper.TriggerJump();
-		}
 	}
 }

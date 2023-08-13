@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using Sandbox;
 
-namespace Pl8Mayhem.util;
+namespace PlatesGame.util;
 
 public abstract class MathC
 {

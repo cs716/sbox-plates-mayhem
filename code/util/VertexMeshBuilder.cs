@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Pl8Mayhem.entity;
+using PlatesGame.Entity;
 using Sandbox;
 
-namespace Pl8Mayhem.util;
+namespace PlatesGame.util;
 
 public partial class VertexMeshBuilder
 {
@@ -65,7 +65,7 @@ public partial class VertexMeshBuilder
 
 	private void AddRectangle(Vector3 position, Vector3 size, int texSize, Color color = new Color())
 	{
-		Rotation rot = Rotation.Identity;
+		var rot = Rotation.Identity;
 
 		var f = size.x * rot.Forward * 0.5f;
 		var l = size.y * rot.Left * 0.5f;
@@ -81,7 +81,7 @@ public partial class VertexMeshBuilder
 		CreateQuad(_vertices, new Ray(position - u, -u.Normal), f, -l, texSize, color);
 	}
 
-	private static void CreateQuad(List<MeshVertex> vertices, Ray origin, Vector3 width, Vector3 height, int texSize = 64, Color color = new Color())
+	private static void CreateQuad(ICollection<MeshVertex> vertices, Ray origin, Vector3 width, Vector3 height, int texSize = 64, Color color = new Color())
 	{
 		var normal = origin.Forward;
 		var tangent = width.Normal;
@@ -120,11 +120,11 @@ public partial class VertexMeshBuilder
 		}
 
 		public static readonly VertexAttribute[] Layout = {
-				new VertexAttribute(VertexAttributeType.Position, VertexAttributeFormat.Float32),
-				new VertexAttribute(VertexAttributeType.Normal, VertexAttributeFormat.Float32),
-				new VertexAttribute(VertexAttributeType.Tangent, VertexAttributeFormat.Float32),
-				new VertexAttribute(VertexAttributeType.TexCoord, VertexAttributeFormat.Float32, components: 2),
-				new VertexAttribute(VertexAttributeType.Color, VertexAttributeFormat.Float32, components: 4)
+				new(VertexAttributeType.Position, VertexAttributeFormat.Float32),
+				new(VertexAttributeType.Normal, VertexAttributeFormat.Float32),
+				new(VertexAttributeType.Tangent, VertexAttributeFormat.Float32),
+				new(VertexAttributeType.TexCoord, VertexAttributeFormat.Float32, components: 2),
+				new(VertexAttributeType.Color, VertexAttributeFormat.Float32, components: 4)
 			};
 	}
 }

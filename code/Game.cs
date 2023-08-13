@@ -1,18 +1,18 @@
 ﻿using Sandbox;
 using Sandbox.Diagnostics;
-using Pl8Mayhem.state;
-using Sandbox.UI.Construct;
 using System;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Pl8Mayhem.entity;
-using Pl8Mayhem.state.GameStates;
+using PlatesGame.Entity;
+using PlatesGame.Entity.Player;
+using PlatesGame.Event;
+using PlatesGame.State;
+using PlatesGame.State.GameStates;
+using PlatesGame.util;
 
 //
 // You don't need to put things in a namespace, but it doesn't hurt.
 //
-namespace Pl8Mayhem;
+namespace PlatesGame;
 
 /// <summary>
 /// This is your game class. This is an entity that is created serverside when
@@ -21,14 +21,25 @@ namespace Pl8Mayhem;
 /// You can use this to create things like HUDs and declare which player class
 /// to use for spawned players.
 /// </summary>
-partial class Pl8Mayhem : GameManager
+partial class PlatesGame : GameManager
 {
-	public static Pl8Mayhem Instance => Current as Pl8Mayhem;
-	public PlateManager PlateManager = new();
-
-	public Pl8Mayhem()
+	public enum DebugTextLocations
 	{
-		ChangeState( new WaitingState() );
+		PlayerData = 0,
+		StateData = 5,
+		EventData = 10
+	}
+	private readonly EventManager Events = new();	
+	public static PlatesGame Instance => Current as PlatesGame;
+	public static EventManager EventManager => Instance.Events;
+	
+	public PlatesGame()
+	{
+		ChangeState( new WaitingState
+		{
+			AllowPlayerJoins = true,
+			HandleStateChanges = false
+		} );
 	}
 	
 	[Net, Change( nameof( OnStateChange ) )] private GameState InternalGameState { get; set; }
@@ -38,6 +49,12 @@ partial class Pl8Mayhem : GameManager
 	{
 		oldState?.OnExit();
 		newState?.OnEnter();
+	}
+
+	[GameEvent.Tick]
+	public static void OnTick()
+	{
+		State?.OnTick();
 	}
 
 	public static void ChangeState( GameState newState )
@@ -55,6 +72,7 @@ partial class Pl8Mayhem : GameManager
 		
 		var pawn = new PlatesPlayer();
 		client.Pawn = pawn;
+		pawn.DressFromClient( client );
 		
 		State?.OnPlayerConnect( client );
 	}
@@ -62,7 +80,7 @@ partial class Pl8Mayhem : GameManager
 	[ConCmd.Admin]
 	public static void CreateBoard()
 	{
-		Instance.PlateManager.CreateBoard();
+		PlateManager.CreateBoard();
 	}
 
 	[ConCmd.Admin]
@@ -83,7 +101,7 @@ partial class Pl8Mayhem : GameManager
 		var playerCount = Game.Clients.Count;
 		var curPlayer = 0;
 
-		foreach(var plate in All.OfType<PlateEntity>().OrderBy(x => Random.Shared.Double( 0, 100 )))
+		foreach(var plate in All.OfType<PlateEntity>().OrderBy(_ => Random.Shared.Double( 0, 100 )))
 		{
 			if(curPlayer >= playerCount)
 			{

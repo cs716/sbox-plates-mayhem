@@ -1,13 +1,20 @@
-﻿using Pl8Mayhem.util;
+﻿using PlatesGame.util;
 using Sandbox;
 
-namespace Pl8Mayhem.entity;
+namespace PlatesGame.Entity;
 
-public partial class MeshEntity : Prop
+public partial class MeshEntity : Sandbox.Prop
 {
 	[Net] public string ModelString { get; set; }
 	[Net] public string Material { get; set; } = "materials/plate.vmat";
-	public Model VertexModel => VertexMeshBuilder.Models[ModelString];
+
+	private Model VertexModel
+	{
+		get
+		{
+			return string.IsNullOrEmpty(ModelString) ? null : VertexMeshBuilder.Models[ModelString];
+		}
+	}
 
 	[Net, Predicted] public Vector3 scale {get;set;} = new Vector3(1f, 1f, 0.01f);
 	[Net, Predicted] public Vector3 ToScale {get;set;} = new Vector3(1f, 1f, 0.01f);
@@ -24,6 +31,10 @@ public partial class MeshEntity : Prop
 	[GameEvent.Tick]
 	public virtual void Tick()
 	{
+		if ( ModelString == null )
+		{
+			return; // happens before the plate is initialized fully
+		}
 		if (!VertexMeshBuilder.Models.ContainsKey(ModelString))
 		{
 			return; // happens after a hot reload :()

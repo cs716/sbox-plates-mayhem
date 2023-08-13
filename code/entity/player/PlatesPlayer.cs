@@ -1,9 +1,9 @@
 ﻿using Sandbox;
 using System.ComponentModel;
-using Pl8Mayhem.entity;
+using PlatesGame.Entity;
 using Sandbox.Component;
 
-namespace Pl8Mayhem;
+namespace PlatesGame.Entity.Player;
 
 public partial class PlatesPlayer : AnimatedEntity
 {
@@ -12,8 +12,10 @@ public partial class PlatesPlayer : AnimatedEntity
 	[Net] public PlateEntity OwnedPlate { get; set; }
 	
 	private bool IsThirdPerson { get; set; } = true;
-	
-	[Net, Predicted]
+
+	[Net] public bool WasImpacted { get; set; } = false; 
+
+	//[Net, Predicted]
 	//public Weapon ActiveWeapon { get; set; }
 
 	[ClientInput]
@@ -58,8 +60,8 @@ public partial class PlatesPlayer : AnimatedEntity
 	{
 		get => new
 		(
-			new Vector3( -16, -16, 0 ),
-			new Vector3( 16, 16, 64 )
+			new Vector3( -10, -10, 0 ),
+			new Vector3( 10, 10, 72 )
 		);
 	}
 
@@ -71,28 +73,37 @@ public partial class PlatesPlayer : AnimatedEntity
 	public override void Spawn()
 	{
 		SetModel( "models/citizen/citizen.vmdl" );
+		SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
+		Tags.Add( "player" );
 		EnableDrawing = false;
+		EnableTouch = true;
 	}
 
 	public void Respawn()
 	{
 		Components.Create<PawnController>();
 		Components.Create<PawnAnimator>();
+		Health = 100f;
 		
 		EnableDrawing = true;
 		EnableHideInFirstPerson = true;
 		EnableShadowInFirstPerson = true;
-		
-		DressFromClient( Client );
 	}
 
-	[GameEvent.Tick.Server]
+	[GameEvent.Tick]
 	private void Tick()
 	{
-		if ( Position.z <= -1000f && Alive)
+		if ( Game.IsServer )
 		{
-			Alive = false;
-			Kill();
+			if ( Position.z <= -1000f && Alive)
+			{
+				Log.Info($"{Client.Name} has died"  );
+				Kill();
+			}
+		}
+		else
+		{
+			EnableDrawing = Alive;
 		}
 	}
 
@@ -108,17 +119,22 @@ public partial class PlatesPlayer : AnimatedEntity
 		}
 	}
 
-	public override void OnKilled()
+	public override void TakeDamage( DamageInfo info )
 	{
-		base.OnKilled();
-		
-		Alive = false;
-		OwnedPlate?.Kill();
-		
-		//Pl8Mayhem.State?.OnPlayerDeath(this);
+		Log.Info( "Damage Taken" );
+		Log.Info( info );
+		base.TakeDamage( info );
 	}
 
-	private void DressFromClient( IClient cl )
+	public override void OnKilled()
+	{
+		Alive = false;
+		
+		OwnedPlate?.Kill();
+		PlatesGame.State?.OnPlayerDeath(this);
+	}
+
+	public void DressFromClient( IClient cl )
 	{
 		var c = new ClothingContainer();
 		c.LoadFromClient( cl );
@@ -143,6 +159,8 @@ public partial class PlatesPlayer : AnimatedEntity
 		Controller?.Simulate( cl );
 		Animator?.Simulate();
 		EyeLocalPosition = Vector3.Up * (64f * Scale);
+
+		//DebugOverlay.Box(Position, Hull.Mins, Hull.Maxs, Color.Green);
 	}
 	
 	public override void FrameSimulate( IClient cl )

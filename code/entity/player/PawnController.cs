@@ -1,18 +1,19 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using PlatesGame.State.GameStates;
 using Sandbox;
 
-namespace Pl8Mayhem;
+namespace PlatesGame.Entity.Player;
 
 public class PawnController : EntityComponent<PlatesPlayer>
 {
 	public int StepSize => 24;
 	public int GroundAngle => 45;
 	public int JumpSpeed => 300;
-	public float Gravity => 800f;
+	public float Gravity { get; set; } = 1000f;
 
-	HashSet<string> ControllerEvents = new( StringComparer.OrdinalIgnoreCase );
+	private readonly HashSet<string> ControllerEvents = new( StringComparer.OrdinalIgnoreCase );
 
 	bool Grounded => Entity.GroundEntity.IsValid();
 
@@ -20,14 +21,24 @@ public class PawnController : EntityComponent<PlatesPlayer>
 	{
 		ControllerEvents.Clear();
 
-		var movement = Input.AnalogMove;
+		var movement = PlatesGame.State is WaitingState ? Vector3.Zero : Input.AnalogMove;
 		var angles = Entity.ViewAngles.WithPitch( 0 );
 		var moveVector = Rotation.From( angles ) * movement * 320f;
 		var groundEntity = CheckForGround();
+
+		if ( Game.IsClient )
+		{
+			DebugOverlay.ScreenText($"Move: {movement}", (int)PlatesGame.DebugTextLocations.PlayerData );
+			DebugOverlay.ScreenText($"Position: {Entity.Position}", (int)PlatesGame.DebugTextLocations.PlayerData + 1 );
+			DebugOverlay.ScreenText($"Alive: {Entity.Alive}", (int)PlatesGame.DebugTextLocations.PlayerData + 2);
+			DebugOverlay.ScreenText( $"Gravity: {Entity.Controller?.Gravity}", (int)PlatesGame.DebugTextLocations.PlayerData + 3 );
+			DebugOverlay.ScreenText( $"Health: {Entity.Health}", (int)PlatesGame.DebugTextLocations.PlayerData + 4 );
+		}
 		
-		DebugOverlay.ScreenText($"Move: {movement}", 1 );
-		DebugOverlay.ScreenText($"Move Vector: {moveVector}", 2 );
-		DebugOverlay.ScreenText($"Alive: {Entity.Alive}", 3);
+		if ( Input.Pressed( "jump" ) )
+		{
+			DoJump();
+		}
 
 		if ( groundEntity.IsValid() )
 		{
@@ -37,18 +48,13 @@ public class PawnController : EntityComponent<PlatesPlayer>
 				AddEvent( "grounded" );
 			}
 
-			Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 200.0f * ( Input.Down( "run" ) ? 2.5f : 1f ), 7.5f );
+			Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 180.0f * ( Input.Down( "run" ) ? 1.5f : 1f ), 7.5f );
 			Entity.Velocity = ApplyFriction( Entity.Velocity, 4.0f );
 		}
 		else
 		{
 			Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 100, 20f );
 			Entity.Velocity += Vector3.Down * Gravity * Time.Delta;
-		}
-
-		if ( Input.Pressed( "jump" ) )
-		{
-			DoJump();
 		}
 
 		var mh = new MoveHelper( Entity.Position, Entity.Velocity );
@@ -75,7 +81,7 @@ public class PawnController : EntityComponent<PlatesPlayer>
 		}
 	}
 
-	Entity CheckForGround()
+	Sandbox.Entity CheckForGround()
 	{
 		if ( Entity.Velocity.z > 100f )
 			return null;
@@ -93,14 +99,14 @@ public class PawnController : EntityComponent<PlatesPlayer>
 
 	Vector3 ApplyFriction( Vector3 input, float frictionAmount )
 	{
-		float StopSpeed = 100.0f;
+		float stopSpeed = 100.0f;
 
 		var speed = input.Length;
 		if ( speed < 0.1f ) return input;
 
 		// Bleed off some speed, but if we have less than the bleed
 		// threshold, bleed the threshold amount.
-		float control = (speed < StopSpeed) ? StopSpeed : speed;
+		float control = (speed < stopSpeed) ? stopSpeed : speed;
 
 		// Add the amount to the drop amount.
 		var drop = control * Time.Delta * frictionAmount;
