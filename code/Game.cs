@@ -42,34 +42,51 @@ partial class PlatesGame : GameManager
 		} );
 	}
 	
-	[Net, Change( nameof( OnStateChange ) )] private GameState InternalGameState { get; set; }
-	public static GameState State => Instance?.InternalGameState;
+	[Net] private GameState InternalGameState { get; set; }
+	[Net] private BaseEvent InternalGameEvent { get; set; }
+	public static GameState CurrentState => Instance?.InternalGameState;
+	public static BaseEvent CurrentEvent => Instance?.InternalGameEvent;
 
-	private void OnStateChange( GameState oldState, GameState newState )
-	{
-		oldState?.OnExit();
-		newState?.OnEnter();
-	}
-
+	// Debug remove this 
+	private string _lastEvent = "None";
+	
 	[GameEvent.Tick]
 	public static void OnTick()
 	{
-		if ( Game.IsClient && State is EventState state)
+		if ( CurrentState is EventState)
 		{
-			var currentEvent = state.GetCurrentEvent();
-			DebugOverlay.ScreenText( $"Event: {currentEvent.Name} ({currentEvent.ShortName}) ({currentEvent.ClassName})", (int)DebugTextLocations.EventData );
-			DebugOverlay.ScreenText( $"Desc: {currentEvent.Description}", (int)DebugTextLocations.EventData + 1 );
+			if ( Instance._lastEvent != CurrentEvent?.Name )
+			{
+				Log.Info($"{(Game.IsServer ? "SERVER" : "CLIENT")} Event changed to: {CurrentEvent?.Name} - It was previously {Instance._lastEvent}"  );
+				Instance._lastEvent = CurrentEvent?.Name;
+				
+				if ( !Game.IsClient )
+					return;
+				
+			}
+			DebugOverlay.ScreenText( $"Event: {CurrentEvent?.Name} ({CurrentEvent?.ClassName})", (int)DebugTextLocations.EventData );
+			DebugOverlay.ScreenText( $"Desc: {CurrentEvent?.Description}", (int)DebugTextLocations.EventData + 1 );
 		}
-		State?.OnTick();
+		CurrentState?.OnTick();
 	}
 
 	public static void ChangeState( GameState newState )
 	{
 		Assert.NotNull( newState );
 
-		Instance.InternalGameState?.OnExit();
+		CurrentState?.OnExit();
 		Instance.InternalGameState = newState;
-		Instance.InternalGameState?.OnEnter();
+		CurrentState?.OnEnter();
+	}
+
+	public static void ChangeEvent( BaseEvent newEvent )
+	{
+		Assert.NotNull( newEvent );
+
+		if ( CurrentEvent?.HasExited == false)
+			CurrentEvent?.OnExit();
+		Instance.InternalGameEvent = newEvent;
+		CurrentEvent?.OnEnter();
 	}
 	
 	public override void ClientJoined( IClient client )
@@ -80,7 +97,7 @@ partial class PlatesGame : GameManager
 		client.Pawn = pawn;
 		pawn.DressFromClient( client );
 		
-		State?.OnPlayerConnect( client );
+		CurrentState?.OnPlayerConnect( client );
 	}
 
 	[ConCmd.Admin]

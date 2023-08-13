@@ -6,11 +6,11 @@ public class SafeEvent : BaseEvent
 	public override double EventWeight => 0;
 	public override bool IsSecret => false;
 
+	public override string Name => "Safe Event";
+
 	public override void OnEnter()
 	{
 		base.OnEnter();
-		Name = "Safe Event";
 		Description = "A safe event where nothing happens";
-		ShortName = "Safe Event";
 	}
 }

@@ -12,8 +12,6 @@ namespace PlatesGame.State
 	{
 		public virtual bool AllowPlayerJoins { get; init; } = false;
 
-		[Net] public BaseEvent CurrentEvent { get; set; }
-
 		public virtual void OnEnter()
 		{
 			NextStateRealTime = NextStateTime;

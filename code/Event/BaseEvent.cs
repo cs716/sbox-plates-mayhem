@@ -8,9 +8,8 @@ namespace PlatesGame.Event;
 public abstract partial class BaseEvent : BaseNetworkable
 {
 	// Event Information
-	[Net] public string Name { get; set; } = "No Name";
+	public virtual string Name => "No Name";
 	[Net] public string Description { get; set; } = "No Description";
-	[Net] public string ShortName { get; set; } = "None";
 
 	public virtual EventManager.EventType EventType => EventManager.EventType.UnclassifiedEvent;
 	public virtual double EventWeight => 1d;
@@ -19,29 +18,18 @@ public abstract partial class BaseEvent : BaseNetworkable
 	// Affected players/plates/etc
 	public virtual int MinAffected { get; set; } = 2;
 	public virtual int MaxAffected { get; set; } = 4;
-	
-	// Enter/Exit functions called when the event is invoked
-	public virtual void OnEnter( PlatesPlayer playerOverride )
-	{
-		OnEnter();
-	}
 
-	public virtual void OnEnter( PlateEntity plateOverride )
-	{
-		OnEnter();
-	}
+	public bool HasExited { get; private set; }
 
-	public virtual void OnEnter() {
-		
-	}
+	public virtual void OnEnter() {}
 
 	public virtual void OnExit()
 	{
 		foreach ( var player in Sandbox.Entity.All.OfType<PlatesPlayer>() )
 			player.WasImpacted = false;
+		
+		HasExited = true;
 	}
 
-	public virtual void OnTick()
-	{
-	}
+	public virtual void OnTick() { }
 }

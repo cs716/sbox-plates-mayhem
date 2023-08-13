@@ -10,13 +10,13 @@ public class ArenaLowGravityEvent : BaseEvent
 	public override EventManager.EventType EventType => EventManager.EventType.ArenaEvent;
 	public override double EventWeight => 1d;
 	public override bool IsSecret => false;
+
+	public override string Name => "Low Gravity";
 	
 	public override void OnEnter()
 	{
 		base.OnEnter();
 		
-		Name = "Low Gravity";
-		ShortName = "Low Gravity";
 		Description = "The gravity in the arena will be lowered for everyone!";
 
 		if ( Game.IsClient )

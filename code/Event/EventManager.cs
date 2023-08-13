@@ -28,9 +28,9 @@ public class EventManager
 		//AddEvent( new ArenaHighGravityEvent() );
 		//AddEvent( new ArenaLowGravityEvent() );
 		//AddEvent( new PlayerSwapEvent() );
-		//AddEvent( new BarrelRainEvent() );
+		AddEvent( new BarrelRainEvent() );
 		//AddEvent( new LavaSpinnerEvent() );
-		//AddEvent( new LandmineEvent() );
+		AddEvent( new LandmineEvent() );
 		AddEvent( new PlateShrinkEvent() );
 	}
 

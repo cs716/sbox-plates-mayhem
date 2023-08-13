@@ -11,12 +11,12 @@ public class BarrelRainEvent : BaseEvent
 	public override EventManager.EventType EventType => EventManager.EventType.ArenaEvent;
 	public override double EventWeight => 1d;
 
+	public override string Name => "Explosive Barrel Rain";
+
 	public override void OnEnter()
 	{
 		base.OnEnter();
 		
-		Name = "Explosive Barrel Rain";
-		ShortName = "Barrel Rain";
 		Description = "Explosive barrels will fall from the heavens!";
 	}
 

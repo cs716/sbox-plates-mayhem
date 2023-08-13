@@ -131,7 +131,7 @@ public partial class PlatesPlayer : AnimatedEntity
 		Alive = false;
 		
 		OwnedPlate?.Kill();
-		PlatesGame.State?.OnPlayerDeath(this);
+		PlatesGame.CurrentState?.OnPlayerDeath(this);
 	}
 
 	public void DressFromClient( IClient cl )

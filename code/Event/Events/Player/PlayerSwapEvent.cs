@@ -19,11 +19,11 @@ public sealed class PlayerSwapEvent : BaseEvent
 	private List<PlayerPair> PlayerPairs { get; } = new();
 	private List<string> PlayerNames { get; } = new();
 
+	public override string Name => "Player Swap";
+
 	public override void OnEnter()
 	{
 		base.OnEnter();
-		Name = "Player Swap";
-		ShortName = "Player Swap";
 		
 		if ( Game.IsClient )
 			return;
@@ -61,7 +61,7 @@ public sealed class PlayerSwapEvent : BaseEvent
 			pair.Player2.Velocity = p1Vel;
 		}
 
-		if ( PlatesGame.State is EventState state )
+		if ( PlatesGame.CurrentState is EventState state )
 		{
 			state.EndEventEarly = true;
 		}

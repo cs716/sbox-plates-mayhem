@@ -35,7 +35,10 @@ public class BarrelEntity : Prop
 		ArenaHelper.Explosion( this, originPos, BlastRadius, BaseDamage, BaseForce, true );
 		Exploded = true;
 		if (Game.IsServer)
+		{
+			EnableDrawing = false;
 			DeleteAsync( 1f );
+		}
 	}
 
 	public override void OnKilled()

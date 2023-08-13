@@ -13,6 +13,8 @@ public class LandmineEvent : BaseEvent
 	private RealTimeSince TimeSinceEnter;
 	private bool MinesSpawned;
 	private int PlatesAffected;
+
+	public override string Name => "Landmines";
 	
 	public override int MinAffected => 1;
 	public override int MaxAffected => 12;
@@ -24,9 +26,7 @@ public class LandmineEvent : BaseEvent
 		MinesSpawned = false;
 		PlatesAffected = Random.Shared.Int(MinAffected, Math.Clamp(PlateManager.Plates().Count( p => !p.IsDead ), MinAffected, MaxAffected));
 		
-		Name = "Landmine Event";
 		Description = $"Landmines will spawn on {PlatesAffected} plates! Avoid setting them off!";
-		ShortName = "Landmines";
 	}
 
 	private void AssignPlates()
@@ -51,7 +51,7 @@ public class LandmineEvent : BaseEvent
 			mine.Spawn();
 			minesSpawned++;
 		}
-		if ( PlatesGame.State is EventState state )
+		if ( PlatesGame.CurrentState is EventState state )
 		{
 			state.EndEventEarly = true;
 		}

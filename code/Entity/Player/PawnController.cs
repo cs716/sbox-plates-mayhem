@@ -21,7 +21,7 @@ public class PawnController : EntityComponent<PlatesPlayer>
 	{
 		ControllerEvents.Clear();
 
-		var movement = PlatesGame.State is WaitingState ? Vector3.Zero : Input.AnalogMove;
+		var movement = PlatesGame.CurrentState is WaitingState ? Vector3.Zero : Input.AnalogMove;
 		var angles = Entity.ViewAngles.WithPitch( 0 );
 		var moveVector = Rotation.From( angles ) * movement * 320f;
 		var groundEntity = CheckForGround();

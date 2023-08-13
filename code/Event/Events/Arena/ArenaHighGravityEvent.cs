@@ -10,12 +10,12 @@ public class ArenaHighGravityEvent : BaseEvent
 	public override double EventWeight => 1d;
 	public override bool IsSecret => false;
 
+	public override string Name => "High Gravity";
+
 	public override void OnEnter()
 	{
 		base.OnEnter();
 		
-		Name = "High Gravity";
-		ShortName = "High Gravity";
 		Description = "The gravity in the arena will be raised for everyone!";
 		
 
@@ -32,7 +32,6 @@ public class ArenaHighGravityEvent : BaseEvent
 	{
 		base.OnExit();
 		
-
 		if ( Game.IsClient )
 			return;
 		

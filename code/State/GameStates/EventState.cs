@@ -6,37 +6,36 @@ namespace PlatesGame.State.GameStates;
 public partial class EventState : GameState
 {
 	[Net] public bool EndEventEarly { get; set; }
+	public override float NextStateTime => 30f;
 
 	public EventState()
 	{
-		CurrentEvent = PlatesGame.EventManager.GetRandomEvent();
-		NextStateTime = 30f;
-	}
-
-	public BaseEvent GetCurrentEvent()
-	{
-		return CurrentEvent; 
+		if ( Game.IsClient )
+			return;
+		
+		PlatesGame.ChangeEvent(PlatesGame.EventManager.GetRandomEvent());
 	}
 
 	public override void OnEnter()
 	{
 		base.OnEnter();
-		CurrentEvent?.OnEnter();
+		PlatesGame.CurrentEvent?.OnEnter();
 	}
 
 	public override void OnExit()
 	{
 		base.OnExit();
-		CurrentEvent?.OnExit();
+		PlatesGame.CurrentEvent?.OnExit();
 	}
 
 	public override void OnTick()
 	{
 		base.OnTick();
-		CurrentEvent?.OnTick();
+		PlatesGame.CurrentEvent?.OnTick();
 
 		if ( NextStateRealTime || EndEventEarly)
 		{
+			PlatesGame.CurrentEvent?.OnExit();
 			PlatesGame.ChangeState( new CooldownState
 			{
 				AllowPlayerJoins = true,

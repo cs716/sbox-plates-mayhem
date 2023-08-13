@@ -15,14 +15,14 @@ public partial class LavaSpinnerEvent : BaseEvent
 	private RealTimeUntil StartDelay;
 	private bool PropsCreated;
 
+	public override string Name => "Lava Wheel";
+
 	public override void OnEnter()
 	{
 		StartDelay = 5f;
 		PropsCreated = false;
 		
-		Name = "Lava Wheel";
 		Description = "Lava will spawn on some plates! Jump to avoid it.";
-		ShortName = "Lava Wheel";
 		
 		base.OnEnter();
 	}
@@ -65,7 +65,7 @@ public partial class LavaSpinnerEvent : BaseEvent
 
 		PropsCreated = true;
 		
-		if ( PlatesGame.State is EventState state )
+		if ( PlatesGame.CurrentState is EventState state )
 		{
 			state.EndEventEarly = true;
 		}

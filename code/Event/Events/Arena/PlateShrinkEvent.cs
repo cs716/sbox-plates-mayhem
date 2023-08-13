@@ -17,6 +17,8 @@ public class PlateShrinkEvent : BaseEvent
 	private const float MinShrink = 0.4f;
 	private const float MaxShrink = 0.8f;
 
+	public override string Name => "Shrink Plate";
+
 	public override void OnEnter()
 	{
 		base.OnEnter();
@@ -27,10 +29,8 @@ public class PlateShrinkEvent : BaseEvent
 		var livingPlates = PlateManager.Plates().Where( p => !p.IsDead ).OrderBy( x => Random.Shared.Double( 1, 100 ) ).ToList();
 		PlatesImpacted = Random.Shared.Int( MinAffected, Math.Clamp( livingPlates.Count, MinAffected, MaxAffected ) );
 
-		Name = "Shrink Plate";
 		Description = $"{livingPlates.Count} plates will randomly shrink in 5 seconds!";
-		ShortName = "Shrink Plate";
-
+		
 		TimeUntilScale = 5;
 		ScaleCompleted = false; 
 	}
@@ -58,7 +58,7 @@ public class PlateShrinkEvent : BaseEvent
 		}
 
 		ScaleCompleted = true;
-		if ( PlatesGame.State is EventState state )
+		if ( PlatesGame.CurrentState is EventState state )
 		{
 			state.EndEventEarly = true;
 		}
