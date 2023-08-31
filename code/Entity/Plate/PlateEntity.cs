@@ -13,7 +13,8 @@ public sealed partial class PlateEntity : MeshEntity
 	[Net] public IClient PlateOwner {get;set;} = null;
     [Net] public string OwnerName {get;set;}
     [Net] public bool IsDead {get;set;}
-    [Net] public bool IsHighlighted { get; set; }
+    
+    [Net] public bool WasImpacted { get; set; }
 
     [Net] public IList<Sandbox.Entity> PlateEnts {get; set;}
     [Net] private Vector3 TargetPosition {get;set;}
@@ -21,7 +22,9 @@ public sealed partial class PlateEntity : MeshEntity
     [Net] private RealTimeSince MovementTime {get;set;}
     [Net] private Vector3 MovementSpeed {get;set;}
     [Net] public bool IsFragile {get;set;} = false;
-    
+
+    private Glow Glow { get; set; }
+
     //private PlateNameTag plateTag = null;
     
     public PlateEntity() { }
@@ -38,18 +41,19 @@ public sealed partial class PlateEntity : MeshEntity
         ToScale = newScale;
         
         motionType = PhysicsMotionType.Keyframed;
+
+        Glow = Components.GetOrCreate<Glow>();
+        Glow.Enabled = false;
+        Glow.ObscuredColor = Color.Cyan;
+        Glow.InsideColor = Color.Cyan;
+        Glow.Color = Color.Blue;
+        
     }
 
-    public sealed override Vector3 Position
+    public override void ClientSpawn()
     {
-	    get { return base.Position; }
-	    set { base.Position = value; }
-    }
-
-    public PlateEntity(Vector3 pos, float size, IClient own) : this(pos, size, own.Name)
-    {
-        PlateOwner = own;
-        PlateEnts = new Collection<Sandbox.Entity>();
+	    base.ClientSpawn();
+	    _ = new UI.PlateTag( this );
     }
 
     public override void Spawn(){
@@ -59,16 +63,12 @@ public sealed partial class PlateEntity : MeshEntity
         EnableAllCollisions = true;
         Tags.Add("solid");
         RenderColor = Color.White;
+        LifeState = LifeState.Alive;
     }
 
     private int FadeOutIncrement; 
     public override void Tick(){
         base.Tick();
-
-        //if(Game.IsClient && plateTag == null)
-        //{
-        //    plateTag = new PlateNameTag(this);
-		//}
 
         var lastScale = scale;
         scale = MathC.Lerp(scale,ToScale,0.125f);
@@ -76,6 +76,13 @@ public sealed partial class PlateEntity : MeshEntity
         {
             ConstructModel();
         }
+
+        if ( IsDead && RenderColor != Color.Red )
+	        SetColor( Color.Red );
+        else if ( RenderColor == Color.White && WasImpacted )
+	        SetColor( Color.Yellow );
+        else if ( RenderColor == Color.Yellow && !WasImpacted )
+	        SetColor( Color.White );
 
         if ( !Game.IsServer )
         {
@@ -89,7 +96,6 @@ public sealed partial class PlateEntity : MeshEntity
 
         if(MovementTime < 0f)
         {
-	        //if(motionType == PhysicsMotionType.Static) SetMotionType(PhysicsMotionType.Dynamic);
 	        Position += MovementSpeed;
 	        Velocity = MovementSpeed;
         }
@@ -102,26 +108,7 @@ public sealed partial class PlateEntity : MeshEntity
 	        }
 	        FadeOutIncrement++;
         }
-
-        //DebugOverlay.Text( $"Plate Owner: {OwnerName}\nDead? ${IsDead}", Position.WithZ( Position.z + 100f  ), Color.Green );
     }
-    
-    // public override void Simulate(Client cl)
-    // {
-    //     base.Simulate(cl);
-
-    //     var lastScale = scale;
-    //     scale = MathC.Lerp(scale,toScale,0.125f);
-    //     if(scale != lastScale)
-    //     {
-    //         ConstructModel();
-    //     }
-
-    //     if(scale.x <= 0 || scale.y <= 0 || scale.z <= 0)
-    //     {
-    //         Delete();
-    //     }
-    // }
 
     public void Kill()
     {
@@ -131,12 +118,12 @@ public sealed partial class PlateEntity : MeshEntity
 	    //Sound.FromEntity("plates_death", this);
 	    SetColor(Color.Red);
 	    DeleteAsync(7);
+	    WasImpacted = false;
 	    IsDead = true;
     }
 
     protected override void OnDestroy()
     {
-        //if(plateTag != null) plateTag.Delete();
         if(Game.IsServer)
         {
             foreach(var ent in PlateEnts)
@@ -161,7 +148,7 @@ public sealed partial class PlateEntity : MeshEntity
 
     public void SetColor(Color color)
     {
-        RenderColor = color;//.WithAlpha(RenderColor.a);
+        RenderColor = color;
     }
 
     public void SetAlpha(float alpha)

@@ -43,7 +43,7 @@ public static class PlateManager
 			return; 
 		
 		plate.PlateOwner = player.Client;
-		plate.OwnerName = player.Name;
+		plate.OwnerName = player.Client.Name;
 		plate.EnableDrawing = true;
 		plate.IsDead = false;
 		player.OwnedPlate = plate;
@@ -69,10 +69,9 @@ public static class PlateManager
 
 	private static PlateEntity FindEmptyPlate()
 	{
-		return Sandbox.Entity.All.OfType<PlateEntity>()
-			.Where( p => p.PlateOwner == null )
-			//.OrderBy( _ => Random.Shared.Double( 0, 100 ) )
-			.First();
+		return Sandbox.Entity.All
+			.OfType<PlateEntity>()
+			.First( p => p.PlateOwner == null );
 	}
 
 	public static void CreatePlates( IEnumerable<IClient> players)

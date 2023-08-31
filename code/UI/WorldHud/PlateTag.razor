@@ -1,0 +1,64 @@
+﻿@namespace PlatesGame.UI
+@using System
+@using global::PlatesGame.Entity
+@using Sandbox
+@using Sandbox.UI
+@inherits BaseEntityWorldPanel 
+
+@attribute [StyleSheet]
+
+@if ( Entity is not PlateEntity plate || !plate.IsValid() )
+{
+	return;
+}
+
+<root>
+	@if ( Plate.PlateOwner is null )
+	{
+		return; 
+	}
+	
+	@if ( Plate.PlateOwner != Game.LocalClient )
+	{
+		<label class="name">@(Plate.PlateOwner.Name.ToLower().EndsWith( 's' ) ? Plate.PlateOwner?.Name + "'" : Plate.PlateOwner?.Name + "'s") plate</label>
+	}
+	else
+	{
+		<label class="local name">Your Plate</label>
+	}
+</root>
+
+@code {
+
+	private PlateEntity Plate => Entity as PlateEntity;
+
+	public PlateTag( PlateEntity plate ) : base( plate, Vector3.Up * 15f )
+	{
+		PanelBounds = new Rect( -1000, -1000, 2000, 2000 );
+	}
+	
+	protected override int BuildHash()
+	{
+		return HashCode.Combine(Plate.PlateOwner?.Name, Plate?.LifeState.ToString(), Style.Display.ToString());
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( Plate.PlateOwner is null )
+			return;
+		
+		if ( Position.Distance( Camera.Position ) >= 1000f )
+		{
+			Style.Display = DisplayMode.None;
+			return;
+		}
+		
+		if (Style.Display != DisplayMode.Flex)
+		{
+			Style.Display = DisplayMode.Flex;
+		}
+	}
+
+}

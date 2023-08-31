@@ -1,0 +1,44 @@
+﻿@namespace PlatesGame.UI
+@using System
+@using global::PlatesGame.State.GameStates
+@using Sandbox
+@using Sandbox.UI
+@inherits Sandbox.UI.Panel 
+
+<root>
+	@if ( GetConnectedPlayers() < GameConfig.MinimumPlayers )
+	{
+		<p class="title center-screen white">Waiting for @(GameConfig.MinimumPlayers - GetConnectedPlayers()) more player@(GameConfig.MinimumPlayers - GetConnectedPlayers() > 1 ? "s" : "") to begin!</p>
+	}
+	else
+	{
+		<p class="title center-screen white">Get ready! The round will begin in @GetCountdown()!</p>
+	}
+</root>
+
+@code {
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( GetConnectedPlayers(), GetCountdown() );
+	}
+
+	private double GetCountdown()
+	{
+		if ( PlatesGame.CurrentState is WaitingState state )
+		{
+			return Math.Clamp( Math.Ceiling( state.NextStateRealTime.Relative ), 0, 100 );
+		}
+		return 0;
+	}
+
+	private int GetConnectedPlayers()
+	{
+		if ( PlatesGame.CurrentState is WaitingState state )
+		{
+			return state.ReadyPlayers;
+		}
+		return -1;
+	}
+
+}

@@ -10,7 +10,10 @@ namespace PlatesGame.State
 {
 	public partial class GameState : BaseNetworkable
 	{
-		public virtual bool AllowPlayerJoins { get; init; } = false;
+		public virtual bool AllowPlayerJoins => false;
+		public virtual bool HandleStateChanges => false;
+		
+		[Net] public RealTimeUntil NextStateRealTime { get; set; }
 
 		public virtual void OnEnter()
 		{
@@ -24,21 +27,33 @@ namespace PlatesGame.State
 
 		public virtual void OnPlayerConnect( IClient client )
 		{
+			if ( Game.IsClient )
+				return;
+			
 			if ( AllowPlayerJoins )
 			{
 				PlateManager.FindAndAssignPlate( client );
+				if ( this is WaitingState state )
+				{
+					state.ReadyPlayers = Sandbox.Entity.All.OfType<PlatesPlayer>().Count( p => p.Alive );
+				}
 			}
+		}
+
+		public virtual void OnPlayerDisconnect( IClient cl, NetworkDisconnectionReason reason )
+		{
+			
 		}
 
 		public virtual void OnTick()
 		{
 			if (Game.IsClient) {
-				DebugOverlay.ScreenText($"Current State {ClassName}", (int)PlatesGame.DebugTextLocations.StateData );
-				DebugOverlay.ScreenText($"Next {NextState?.ClassName}", (int)PlatesGame.DebugTextLocations.StateData + 1 );
-				DebugOverlay.ScreenText($"Time: {Math.Floor(NextStateRealTime.Passed)}/{NextStateTime}", (int)PlatesGame.DebugTextLocations.StateData + 2 );
+				//DebugOverlay.ScreenText($"Current State {ClassName}", (int)PlatesGame.DebugTextLocations.StateData );
+				//DebugOverlay.ScreenText($"Time: {NextStateRealTime.Relative.CeilToInt()}", (int)PlatesGame.DebugTextLocations.StateData + 1 );
+				return;
 			}
 			
-			if ( NextStateRealTime && HandleStateChanges)
+			if ( Game.IsServer && NextStateRealTime && HandleStateChanges)
 			{
 				PlatesGame.ChangeState( NextState );
 			}
@@ -46,6 +61,9 @@ namespace PlatesGame.State
 
 		public virtual void OnPlayerDeath( PlatesPlayer player )
 		{
+			if ( Game.IsClient )
+				return;
+			
 			var livingPlayers = Sandbox.Entity.All.OfType<PlatesPlayer>().Where( p => p.Alive );
 			var platesPlayers = livingPlayers as PlatesPlayer[] ?? livingPlayers.ToArray();
 			if ( !platesPlayers.Any() )
@@ -54,7 +72,6 @@ namespace PlatesGame.State
 				{
 					WinnerName = "Nobody",
 					WinnerNetId = -1,
-					HandleStateChanges = true,
 					NextStateRealTime = 5f
 				});
 			} else if ( platesPlayers.Length == 1 )
@@ -64,16 +81,12 @@ namespace PlatesGame.State
 				{
 					WinnerName = winner.Client.Name,
 					WinnerNetId = winner.NetworkIdent,
-					HandleStateChanges = true,
 					NextStateRealTime = 5f
 				});
 			}
 		}
 
 		public virtual float NextStateTime { get; set; }
-		public virtual RealTimeUntil NextStateRealTime { get; set; }
-
-		public virtual bool HandleStateChanges { get; init; } = false;
 		
 		public virtual GameState NextState { get; set; }
 	}

@@ -9,8 +9,6 @@ public class ArenaLowGravityEvent : BaseEvent
 
 	public override EventManager.EventType EventType => EventManager.EventType.ArenaEvent;
 	public override double EventWeight => 1d;
-	public override bool IsSecret => false;
-
 	public override string Name => "Low Gravity";
 	
 	public override void OnEnter()

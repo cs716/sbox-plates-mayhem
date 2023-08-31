@@ -1,0 +1,14 @@
+﻿HealthBar {
+  position: absolute;
+  left: 25px;
+  bottom: 25px;
+  background-color: #500300;
+  width: 400px;
+  height: 50px;
+  border-radius: 10px;
+  
+  .inner {
+    transition: width 1s;
+    border-radius: 10px;
+  }
+}

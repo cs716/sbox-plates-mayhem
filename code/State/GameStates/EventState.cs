@@ -1,4 +1,6 @@
-﻿using PlatesGame.Event;
+﻿using System.Linq;
+using PlatesGame.Entity;
+using PlatesGame.Event;
 using Sandbox;
 
 namespace PlatesGame.State.GameStates;
@@ -12,8 +14,9 @@ public partial class EventState : GameState
 	{
 		if ( Game.IsClient )
 			return;
-		
-		PlatesGame.ChangeEvent(PlatesGame.EventManager.GetRandomEvent());
+
+		var newEvent = PlatesGame.EventManager.GetRandomEvent();
+		PlatesGame.ChangeEvent(newEvent);
 	}
 
 	public override void OnEnter()
@@ -38,11 +41,20 @@ public partial class EventState : GameState
 			PlatesGame.CurrentEvent?.OnExit();
 			PlatesGame.ChangeState( new CooldownState
 			{
-				AllowPlayerJoins = true,
-				HandleStateChanges = true,
 				NextStateTime = 5f,
 				NextState = new EventState()
 			});
+		}
+	}
+	
+	public override void OnPlayerDisconnect( IClient client, NetworkDisconnectionReason reason )
+	{
+		if ( Game.IsClient )
+			return;
+
+		foreach (var plate in Sandbox.Entity.All.OfType<PlateEntity>().Where( p => p.PlateOwner == client ))
+		{
+			plate.IsDead = true;
 		}
 	}
 }

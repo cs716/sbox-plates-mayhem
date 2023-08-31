@@ -1,0 +1,31 @@
+﻿@namespace PlatesGame.UI
+@using Sandbox
+@inherits Sandbox.UI.WorldPanel 
+
+<root />
+
+@code {
+
+	protected readonly Entity Entity;
+	private readonly Vector3 Offset;
+
+	public BaseEntityWorldPanel( Entity entity, Vector3 offset )
+	{
+		SceneObject.RenderLayer = SceneRenderLayer.OverlayWithoutDepth;
+		Entity = entity;
+		Offset = offset;
+	}
+
+	public override void Tick()
+	{
+		if ( !Entity.IsValid() || Entity.LifeState == LifeState.Dead || Entity.LifeState == LifeState.Dying )
+		{
+			Delete( true );
+			return;
+		}
+
+		Position = Entity.Position + Offset;
+		Rotation = Camera.Rotation.RotateAroundAxis( Vector3.Up, 180f );
+	}
+
+}

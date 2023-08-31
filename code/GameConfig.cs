@@ -14,7 +14,7 @@ public static class GameConfig
 	public static float WinnerScreenTime { get; set; } = 20f;
 
 	[ConVar.Replicated( "player_default_gravity" )]
-	public static float DefaultGravity { get; set; } = 1000f;
+	public static float DefaultGravity { get; set; } = 800f;
 
 }
 

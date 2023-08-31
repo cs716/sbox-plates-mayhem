@@ -87,6 +87,10 @@ public sealed class PlayerSwapEvent : BaseEvent
 				Player1 = players[i],
 				Player2 = players[i + 1]
 			};
+
+			players[i].WasImpacted = true;
+			players[i + 1].WasImpacted = true;
+			
 			PlayerPairs.Add( pair );
 			PlayerNames.Add( players[i]?.Client.Name );
 			PlayerNames.Add( players[i+1]?.Client.Name );

@@ -25,13 +25,14 @@ public class EventManager
 	public EventManager()
 	{
 		AddEvent( new SafeEvent() );
-		//AddEvent( new ArenaHighGravityEvent() );
-		//AddEvent( new ArenaLowGravityEvent() );
-		//AddEvent( new PlayerSwapEvent() );
+		AddEvent( new ArenaHighGravityEvent() );
+		AddEvent( new ArenaLowGravityEvent() );
+		AddEvent( new PlayerSwapEvent() );
 		AddEvent( new BarrelRainEvent() );
-		//AddEvent( new LavaSpinnerEvent() );
+		AddEvent( new LavaSpinnerEvent() );
 		AddEvent( new LandmineEvent() );
 		AddEvent( new PlateShrinkEvent() );
+		AddEvent( new PlateGrowEvent() );
 	}
 
 	private void AddEvent(BaseEvent newEvent) {
@@ -47,8 +48,10 @@ public class EventManager
 	{
 		var totalWeight = Events.Sum( baseEvent => baseEvent.EventWeight );
 		var randomValue = Random.Shared.Double( 0, totalWeight );
+		var currentEvent = PlatesGame.CurrentEvent != null ? PlatesGame.CurrentEvent.ClassName : "None";
+		Log.Info("Current Exiting Event: " + currentEvent  );
 		
-		foreach (var baseEvent in Events.Where(e => e.EventWeight > 0 ))
+		foreach (var baseEvent in Events.Where( e => e.ClassName != currentEvent).Where(e => e.EventWeight > 0 ))
 		{
 			if ( randomValue <= baseEvent.EventWeight )
 				return baseEvent;

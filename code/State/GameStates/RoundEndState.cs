@@ -16,6 +16,6 @@ public partial class RoundEndState : CooldownState
 		base.OnEnter();
 		
 		Log.Info($"Winner: {WinnerName} ({WinnerNetId})!"  );
-		NextState = new WaitingState { AllowPlayerJoins = true, HandleStateChanges = false };
+		NextState = new WaitingState();
 	}
 }

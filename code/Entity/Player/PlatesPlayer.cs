@@ -1,4 +1,5 @@
-﻿using Sandbox;
+﻿using System;
+using Sandbox;
 using System.ComponentModel;
 using PlatesGame.Entity;
 using Sandbox.Component;
@@ -13,7 +14,8 @@ public partial class PlatesPlayer : AnimatedEntity
 	
 	private bool IsThirdPerson { get; set; } = true;
 
-	[Net] public bool WasImpacted { get; set; } = false; 
+
+	[Net] public bool WasImpacted { get; set; } 
 
 	//[Net, Predicted]
 	//public Weapon ActiveWeapon { get; set; }
@@ -60,34 +62,55 @@ public partial class PlatesPlayer : AnimatedEntity
 	{
 		get => new
 		(
-			new Vector3( -10, -10, 0 ),
-			new Vector3( 10, 10, 72 )
+			new Vector3( -16, -16, 0 ),
+			new Vector3( 16, 16, 64 )
 		);
 	}
 
-	[BindComponent] public PawnController Controller { get; }
-	[BindComponent] public PawnAnimator Animator { get; }
+	public PawnController Controller { get; set; }
+	public PawnAnimator Animator { get; set;  }
+	private Glow Glow { get; set; }
 
-	public override Ray AimRay => new Ray( EyePosition, EyeRotation.Forward );
+	public override Ray AimRay => new( EyePosition, EyeRotation.Forward );
 
 	public override void Spawn()
 	{
-		SetModel( "models/citizen/citizen.vmdl" );
-		SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
-		Tags.Add( "player" );
 		EnableDrawing = false;
 		EnableTouch = true;
+		Tags.Add( "player", "playerclip" );
+
+		if ( Game.IsServer )
+		{
+			SetModel( "models/citizen/citizen.vmdl" );
+			SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
+		}
+	}
+
+	public override void ClientSpawn()
+	{
+		base.ClientSpawn();
+		_ = new UI.PlayerTag( this );
 	}
 
 	public void Respawn()
 	{
-		Components.Create<PawnController>();
-		Components.Create<PawnAnimator>();
+		Controller = Components.GetOrCreate<PawnController>();
+		Animator = Components.GetOrCreate<PawnAnimator>();
+		Glow = Components.GetOrCreate<Glow>();
+
+		Glow.Enabled = false;
+		Glow.ObscuredColor = Color.Cyan;
+		Glow.InsideColor = Color.Cyan;
+		Glow.Color = Color.Blue;
+		
 		Health = 100f;
 		
 		EnableDrawing = true;
 		EnableHideInFirstPerson = true;
 		EnableShadowInFirstPerson = true;
+		
+		LifeState = LifeState.Alive;
+		Controller.Gravity = GameConfig.DefaultGravity;
 	}
 
 	[GameEvent.Tick]
@@ -95,7 +118,7 @@ public partial class PlatesPlayer : AnimatedEntity
 	{
 		if ( Game.IsServer )
 		{
-			if ( Position.z <= -1000f && Alive)
+			if ( Position.z <= -2000f && Alive)
 			{
 				Log.Info($"{Client.Name} has died"  );
 				Kill();
@@ -104,6 +127,9 @@ public partial class PlatesPlayer : AnimatedEntity
 		else
 		{
 			EnableDrawing = Alive;
+			if (Glow != null)
+				Glow.Enabled = WasImpacted;
+
 		}
 	}
 
@@ -119,16 +145,10 @@ public partial class PlatesPlayer : AnimatedEntity
 		}
 	}
 
-	public override void TakeDamage( DamageInfo info )
-	{
-		Log.Info( "Damage Taken" );
-		Log.Info( info );
-		base.TakeDamage( info );
-	}
-
 	public override void OnKilled()
 	{
 		Alive = false;
+		LifeState = LifeState.Dead;
 		
 		OwnedPlate?.Kill();
 		PlatesGame.CurrentState?.OnPlayerDeath(this);
@@ -162,7 +182,8 @@ public partial class PlatesPlayer : AnimatedEntity
 
 		//DebugOverlay.Box(Position, Hull.Mins, Hull.Maxs, Color.Green);
 	}
-	
+
+	private int MouseWheelDistance = 0;
 	public override void FrameSimulate( IClient cl )
 	{
 		SimulateRotation();
@@ -170,19 +191,24 @@ public partial class PlatesPlayer : AnimatedEntity
 		Camera.Rotation = ViewAngles.ToRotation();
 		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( Game.Preferences.FieldOfView );
 
-		if ( Input.Pressed( "view" ) )
+		MouseWheelDistance = Math.Clamp(MouseWheelDistance + Input.MouseWheel*10, -500, 80);
+		//DebugOverlay.ScreenText( "MWheel: " + MouseWheelDistance, 0 );
+
+		IsThirdPerson = MouseWheelDistance < 80;
+
+		/*if ( Input.Pressed( "view" ) )
 		{
 			IsThirdPerson = !IsThirdPerson;
-		}
+		}*/
 
 		if ( IsThirdPerson )
 		{
-			Vector3 targetPos;
 			var pos = Position + Vector3.Up * 64;
 			var rot = Camera.Rotation * Rotation.FromAxis( Vector3.Up, -16 );
 
-			float distance = 80.0f * Scale;
-			targetPos = pos + rot.Right * ((CollisionBounds.Mins.x + 50) * Scale);
+			var distance = (80.0f * Scale) + -MouseWheelDistance;
+			//var targetPos = pos + rot.Right * ((CollisionBounds.Mins.x + 50) * Scale);
+			var targetPos = pos;
 			targetPos += rot.Forward * -distance;
 
 			var tr = Trace.Ray( pos, targetPos )

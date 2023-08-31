@@ -8,32 +8,30 @@ namespace PlatesGame.Entity.Player;
 
 public class PawnController : EntityComponent<PlatesPlayer>
 {
-	public int StepSize => 24;
-	public int GroundAngle => 45;
-	public int JumpSpeed => 300;
-	public float Gravity { get; set; } = 1000f;
+	private static int StepSize => 24;
+	private static int GroundAngle => 45;
+	private static int JumpSpeed => 400;
+	public float Gravity { get; set; } = 800f;
 
 	private readonly HashSet<string> ControllerEvents = new( StringComparer.OrdinalIgnoreCase );
 
-	bool Grounded => Entity.GroundEntity.IsValid();
+	private bool Grounded => Entity.GroundEntity.IsValid();
 
 	public void Simulate( IClient cl )
 	{
 		ControllerEvents.Clear();
 
-		var movement = PlatesGame.CurrentState is WaitingState ? Vector3.Zero : Input.AnalogMove;
+		var movement = (PlatesGame.CurrentState is WaitingState || Entity.Client.IsBot) ? Vector3.Zero : Input.AnalogMove;
 		var angles = Entity.ViewAngles.WithPitch( 0 );
 		var moveVector = Rotation.From( angles ) * movement * 320f;
 		var groundEntity = CheckForGround();
 
-		if ( Game.IsClient )
+		/*if ( Game.IsClient )
 		{
-			DebugOverlay.ScreenText($"Move: {movement}", (int)PlatesGame.DebugTextLocations.PlayerData );
-			DebugOverlay.ScreenText($"Position: {Entity.Position}", (int)PlatesGame.DebugTextLocations.PlayerData + 1 );
-			DebugOverlay.ScreenText($"Alive: {Entity.Alive}", (int)PlatesGame.DebugTextLocations.PlayerData + 2);
-			DebugOverlay.ScreenText( $"Gravity: {Entity.Controller?.Gravity}", (int)PlatesGame.DebugTextLocations.PlayerData + 3 );
-			DebugOverlay.ScreenText( $"Health: {Entity.Health}", (int)PlatesGame.DebugTextLocations.PlayerData + 4 );
-		}
+			DebugOverlay.ScreenText($"Position: {Entity.Position}", (int)PlatesGame.DebugTextLocations.PlayerData);
+			DebugOverlay.ScreenText($"Alive: {Entity.Alive}", (int)PlatesGame.DebugTextLocations.PlayerData + 1);
+			DebugOverlay.ScreenText( $"Health: {Entity.Health}", (int)PlatesGame.DebugTextLocations.PlayerData + 2 );
+		}*/
 		
 		if ( Input.Pressed( "jump" ) )
 		{
@@ -58,7 +56,7 @@ public class PawnController : EntityComponent<PlatesPlayer>
 		}
 
 		var mh = new MoveHelper( Entity.Position, Entity.Velocity );
-		mh.Trace = mh.Trace.Size( Entity.Hull ).Ignore( Entity );
+		mh.Trace = mh.Trace.WithAnyTags("solid").Size( Entity.Hull ).Ignore( Entity );
 
 		if ( mh.TryMoveWithStep( Time.Delta, StepSize ) > 0 )
 		{
@@ -91,54 +89,51 @@ public class PawnController : EntityComponent<PlatesPlayer>
 		if ( !trace.Hit )
 			return null;
 
-		if ( trace.Normal.Angle( Vector3.Up ) > GroundAngle )
-			return null;
-
-		return trace.Entity;
+		return trace.Normal.Angle( Vector3.Up ) > GroundAngle ? null : trace.Entity;
 	}
 
 	Vector3 ApplyFriction( Vector3 input, float frictionAmount )
 	{
-		float stopSpeed = 100.0f;
+		const float stopSpeed = 100.0f;
 
 		var speed = input.Length;
 		if ( speed < 0.1f ) return input;
 
 		// Bleed off some speed, but if we have less than the bleed
 		// threshold, bleed the threshold amount.
-		float control = (speed < stopSpeed) ? stopSpeed : speed;
+		var control = (speed < stopSpeed) ? stopSpeed : speed;
 
 		// Add the amount to the drop amount.
 		var drop = control * Time.Delta * frictionAmount;
 
 		// scale the velocity
-		float newspeed = speed - drop;
-		if ( newspeed < 0 ) newspeed = 0;
-		if ( newspeed == speed ) return input;
+		var newSpeed = speed - drop;
+		if ( newSpeed < 0 ) newSpeed = 0;
+		if ( newSpeed.AlmostEqual(speed) ) return input;
 
-		newspeed /= speed;
-		input *= newspeed;
+		newSpeed /= speed;
+		input *= newSpeed;
 
 		return input;
 	}
 
-	Vector3 Accelerate( Vector3 input, Vector3 wishdir, float wishspeed, float speedLimit, float acceleration )
+	Vector3 Accelerate( Vector3 input, Vector3 wishDir, float wishSpeed, float speedLimit, float acceleration )
 	{
-		if ( speedLimit > 0 && wishspeed > speedLimit )
-			wishspeed = speedLimit;
+		if ( speedLimit > 0 && wishSpeed > speedLimit )
+			wishSpeed = speedLimit;
 
-		var currentspeed = input.Dot( wishdir );
-		var addspeed = wishspeed - currentspeed;
+		var currentSpeed = input.Dot( wishDir );
+		var addSpeed = wishSpeed - currentSpeed;
 
-		if ( addspeed <= 0 )
+		if ( addSpeed <= 0 )
 			return input;
 
-		var accelspeed = acceleration * Time.Delta * wishspeed;
+		var accelSpeed = acceleration * Time.Delta * wishSpeed;
 
-		if ( accelspeed > addspeed )
-			accelspeed = addspeed;
+		if ( accelSpeed > addSpeed )
+			accelSpeed = addSpeed;
 
-		input += wishdir * accelspeed;
+		input += wishDir * accelSpeed;
 
 		return input;
 	}
@@ -162,12 +157,16 @@ public class PawnController : EntityComponent<PlatesPlayer>
 		// Now trace down from a known safe position
 		trace = Entity.TraceBBox( start, end );
 
-		if ( trace.Fraction <= 0 ) return position;
-		if ( trace.Fraction >= 1 ) return position;
-		if ( trace.StartedSolid ) return position;
-		if ( Vector3.GetAngle( Vector3.Up, trace.Normal ) > GroundAngle ) return position;
+		switch (trace.Fraction)
+		{
+			case <= 0:
+				return position;
+			case >= 1:
+				return position;
+		}
 
-		return trace.EndPosition;
+		if ( trace.StartedSolid ) return position;
+		return Vector3.GetAngle( Vector3.Up, trace.Normal ) > GroundAngle ? position : trace.EndPosition;
 	}
 
 	public bool HasEvent( string eventName )

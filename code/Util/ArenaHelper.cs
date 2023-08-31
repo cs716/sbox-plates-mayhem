@@ -14,7 +14,7 @@ public class ArenaHelper
 			Particles.Create( "particles/explosion/barrel_explosion/explosion_barrel.vpcf", position );
 		}
 		
-		DebugOverlay.Sphere(position, radius, Color.Red, 2f);
+		//DebugOverlay.Sphere(position, radius, Color.Red, 2f);
 		
 		// Damage, etc
 		var overlaps = Sandbox.Entity.FindInSphere( position, radius );

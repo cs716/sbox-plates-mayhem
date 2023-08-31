@@ -1,0 +1,72 @@
+@namespace PlatesGame.UI
+@using System
+@using global::PlatesGame.Entity.Player
+@using Sandbox
+@using Sandbox.UI
+@inherits BaseEntityWorldPanel 
+
+@attribute [StyleSheet]
+
+@if ( Entity is not PlatesPlayer player || !player.IsValid() )
+{
+	return;
+}
+
+<root>
+	@if ( !player.IsLocalPawn )
+	{
+		<label class="name">@Player.Client.Name</label>
+	}
+	<div class="healthbar">
+		<div @ref="HealthInner" class="inner"></div>
+	</div>
+
+</root>
+
+@code {
+	
+	private Panel HealthInner { get; set; }
+
+	private PlatesPlayer Player => Entity as PlatesPlayer;
+
+	private const float TransitionRate = 50f;
+
+	public PlayerTag( PlatesPlayer player ) : base( player, Vector3.Up * 85f )
+	{
+		PanelBounds = new Rect( -1000, -1000, 2000, 2000 );
+	}
+	
+	protected override int BuildHash()
+	{
+		return HashCode.Combine(Player?.Name, Player?.Health, Player?.LifeState.ToString(), Style.Display.ToString());
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( Player.LifeState != LifeState.Alive )
+			return;
+
+		if ( Position.Distance( Camera.Position ) >= 1000f )
+		{
+			Style.Display = DisplayMode.None;
+			return;
+		}
+		
+		if (Style.Display != DisplayMode.Flex)
+		{
+			Style.Display = DisplayMode.Flex;
+		}
+		
+		HealthInner.Style.Width = Length.Percent( Player.Health );
+		HealthInner.Style.BackgroundColor = Player.Health switch
+		{
+			>= 51 => Color.Green,
+			>= 25 and <= 50 => Color.Yellow,
+			_ => Color.Red
+			};
+		Style.Display = (Game.LocalPawn.LifeState == LifeState.Alive) ? DisplayMode.Flex : DisplayMode.None;
+	}
+
+}

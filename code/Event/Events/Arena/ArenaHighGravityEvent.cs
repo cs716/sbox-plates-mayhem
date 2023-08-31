@@ -8,8 +8,6 @@ public class ArenaHighGravityEvent : BaseEvent
 {
 	public override EventManager.EventType EventType => EventManager.EventType.ArenaEvent;
 	public override double EventWeight => 1d;
-	public override bool IsSecret => false;
-
 	public override string Name => "High Gravity";
 
 	public override void OnEnter()
@@ -24,7 +22,7 @@ public class ArenaHighGravityEvent : BaseEvent
 		
 		foreach (var player in Sandbox.Entity.All.OfType<PlatesPlayer>().Where( p => p.Alive  ))
 		{
-			player.Controller.Gravity += GameConfig.DefaultGravity * 0.3f;
+			player.Controller.Gravity += GameConfig.DefaultGravity * 0.5f;
 		}
 	}
 

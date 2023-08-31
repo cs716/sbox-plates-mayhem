@@ -4,7 +4,6 @@ public class SafeEvent : BaseEvent
 {
 	public override EventManager.EventType EventType => EventManager.EventType.RoundEvent;
 	public override double EventWeight => 0;
-	public override bool IsSecret => false;
 
 	public override string Name => "Safe Event";
 

@@ -32,20 +32,24 @@ partial class PlatesGame : GameManager
 	private readonly EventManager Events = new();	
 	public static PlatesGame Instance => Current as PlatesGame;
 	public static EventManager EventManager => Instance.Events;
+
+	private UI.PlatesHud _hud;
 	
 	public PlatesGame()
 	{
-		ChangeState( new WaitingState
+		ChangeState( new WaitingState() );
+		if ( Game.IsClient )
 		{
-			AllowPlayerJoins = true,
-			HandleStateChanges = false
-		} );
+			_hud = new UI.PlatesHud();
+		}
 	}
 	
 	[Net] private GameState InternalGameState { get; set; }
 	[Net] private BaseEvent InternalGameEvent { get; set; }
 	public static GameState CurrentState => Instance?.InternalGameState;
 	public static BaseEvent CurrentEvent => Instance?.InternalGameEvent;
+	
+	public static UI.PlatesHud PlayerHud => Instance?._hud;
 
 	// Debug remove this 
 	private string _lastEvent = "None";
@@ -59,20 +63,25 @@ partial class PlatesGame : GameManager
 			{
 				Log.Info($"{(Game.IsServer ? "SERVER" : "CLIENT")} Event changed to: {CurrentEvent?.Name} - It was previously {Instance._lastEvent}"  );
 				Instance._lastEvent = CurrentEvent?.Name;
-				
-				if ( !Game.IsClient )
-					return;
-				
+
+				if ( Game.IsClient )
+					PlayerHud.SetLargeNotification( CurrentEvent?.Name, CurrentEvent?.Description, 5f );
+
 			}
-			DebugOverlay.ScreenText( $"Event: {CurrentEvent?.Name} ({CurrentEvent?.ClassName})", (int)DebugTextLocations.EventData );
-			DebugOverlay.ScreenText( $"Desc: {CurrentEvent?.Description}", (int)DebugTextLocations.EventData + 1 );
 		}
 		CurrentState?.OnTick();
+	}
+
+	[ConCmd.Client]
+	public static void TestNotification()
+	{
+		PlayerHud.SetLargeNotification( "Test Notification Large", "Test Subtext Large", 10f );
 	}
 
 	public static void ChangeState( GameState newState )
 	{
 		Assert.NotNull( newState );
+		Log.Info("Called ChangeState - Set state to " + newState.ClassName  );
 
 		CurrentState?.OnExit();
 		Instance.InternalGameState = newState;
@@ -81,7 +90,8 @@ partial class PlatesGame : GameManager
 
 	public static void ChangeEvent( BaseEvent newEvent )
 	{
-		Assert.NotNull( newEvent );
+		if ( newEvent == null )
+			return;
 
 		if ( CurrentEvent?.HasExited == false)
 			CurrentEvent?.OnExit();
@@ -98,6 +108,13 @@ partial class PlatesGame : GameManager
 		pawn.DressFromClient( client );
 		
 		CurrentState?.OnPlayerConnect( client );
+	}
+
+	public override void ClientDisconnect( IClient cl, NetworkDisconnectionReason reason )
+	{
+		base.ClientDisconnect( cl, reason );
+
+		CurrentState?.OnPlayerDisconnect( cl, reason );
 	}
 
 	[ConCmd.Admin]

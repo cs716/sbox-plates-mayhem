@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using PlatesGame.Entity;
 using PlatesGame.Entity.Player;
+using PlatesGame.util;
 using Sandbox;
 
 namespace PlatesGame.Event;
@@ -13,7 +14,6 @@ public abstract partial class BaseEvent : BaseNetworkable
 
 	public virtual EventManager.EventType EventType => EventManager.EventType.UnclassifiedEvent;
 	public virtual double EventWeight => 1d;
-	public virtual bool IsSecret => false;
 	
 	// Affected players/plates/etc
 	public virtual int MinAffected { get; set; } = 2;
@@ -27,6 +27,9 @@ public abstract partial class BaseEvent : BaseNetworkable
 	{
 		foreach ( var player in Sandbox.Entity.All.OfType<PlatesPlayer>() )
 			player.WasImpacted = false;
+
+		foreach ( var plate in PlateManager.Plates() )
+			plate.WasImpacted = false;
 		
 		HasExited = true;
 	}

@@ -1,0 +1,22 @@
+﻿PlateTag {
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #FFF;
+  
+  label {
+    font-size: 70px;
+    font-family: RussoOne;
+    border-radius: 4px;
+    padding: 0px 20px;
+    text-shadow: 2px 2px 2px black;
+    margin: 2px 0;
+    text-align: center;
+    
+    &.local {
+      color: #00ff00;
+    }
+  }
+  
+  
+}
