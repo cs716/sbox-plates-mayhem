@@ -1,9 +1,7 @@
 ﻿using System.Linq;
-using PlatesGame.Entity;
-using PlatesGame.Event;
 using Sandbox;
 
-namespace PlatesGame.State.GameStates;
+namespace PlatesGame;
 
 public partial class EventState : GameState
 {
@@ -52,7 +50,7 @@ public partial class EventState : GameState
 		if ( Game.IsClient )
 			return;
 
-		foreach (var plate in Sandbox.Entity.All.OfType<PlateEntity>().Where( p => p.PlateOwner == client ))
+		foreach (var plate in Entity.All.OfType<PlateEntity>().Where( p => p.PlateOwner == client ))
 		{
 			plate.IsDead = true;
 		}

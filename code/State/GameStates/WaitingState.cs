@@ -1,12 +1,7 @@
 ﻿using System.Linq;
-using System.Threading;
-using PlatesGame.Entity;
-using PlatesGame.Entity.Player;
-using PlatesGame.Event;
-using PlatesGame.util;
 using Sandbox;
 
-namespace PlatesGame.State.GameStates;
+namespace PlatesGame;
 
 public partial class WaitingState : GameState
 {
@@ -26,7 +21,7 @@ public partial class WaitingState : GameState
 		
 		PlateManager.CreatePlates(Game.Clients);
 		
-		ReadyPlayers = Sandbox.Entity.All.OfType<PlatesPlayer>().Count( p => p.Alive );
+		ReadyPlayers = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
 	}
 
 	public override void OnExit()
@@ -36,7 +31,7 @@ public partial class WaitingState : GameState
 		if ( Game.IsClient )
 			return;
 		
-		foreach (var plate in Sandbox.Entity.All.OfType<PlateEntity>().Where(p => p.PlateOwner == null  ))
+		foreach (var plate in Entity.All.OfType<PlateEntity>().Where(p => p.PlateOwner == null  ))
 		{
 			plate.Delete();
 		}
@@ -89,15 +84,20 @@ public partial class WaitingState : GameState
 		if ( Game.IsClient )
 			return;
 
-		foreach (var plate in Sandbox.Entity.All.OfType<PlateEntity>().Where( p => p.PlateOwner == client ))
+		foreach (var plate in Entity.All.OfType<PlateEntity>().Where( p => p.PlateOwner == client ))
 		{
 			plate.PlateOwner = null; 
 		}
-		ReadyPlayers = Sandbox.Entity.All.OfType<PlatesPlayer>().Count( p => p.Alive );
+		ReadyPlayers = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
 	}
 
 	private static void StartRound()
 	{
+		foreach (var platesPlayer in Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive  ))
+		{
+			PlateManager.ReturnPlayerToPlate( platesPlayer );
+		}
+
 		PlatesGame.ChangeState( new CooldownState
 		{
 			NextStateTime = 5f,

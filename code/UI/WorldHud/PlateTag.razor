@@ -1,6 +1,5 @@
 ﻿@namespace PlatesGame.UI
 @using System
-@using global::PlatesGame.Entity
 @using Sandbox
 @using Sandbox.UI
 @inherits BaseEntityWorldPanel 
@@ -46,7 +45,7 @@
 	{
 		base.Tick();
 
-		if ( Plate.PlateOwner is null )
+		if ( Plate.PlateOwner is null || !Plate.PlateOwner.IsValid() || !this.IsValid())
 			return;
 		
 		if ( Position.Distance( Camera.Position ) >= 1000f )

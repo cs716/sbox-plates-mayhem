@@ -1,8 +1,7 @@
 ﻿using System.Linq;
-using PlatesGame.Entity;
 using Sandbox;
 
-namespace PlatesGame.State.GameStates;
+namespace PlatesGame;
 
 public partial class CooldownState : GameState
 {
@@ -13,7 +12,7 @@ public partial class CooldownState : GameState
 		if ( Game.IsClient )
 			return;
 
-		foreach (var plate in Sandbox.Entity.All.OfType<PlateEntity>().Where( p => p.PlateOwner == client ))
+		foreach (var plate in Entity.All.OfType<PlateEntity>().Where( p => p.PlateOwner == client ))
 		{
 			plate.IsDead = true;
 		}

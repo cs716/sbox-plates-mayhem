@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PlatesGame.Entity;
-using PlatesGame.State.GameStates;
-using PlatesGame.util;
 using Sandbox;
 
-namespace PlatesGame.Event.Events.Arena;
+namespace PlatesGame;
 
 public class PlateGrowEvent : BaseEvent
 {

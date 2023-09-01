@@ -1,4 +1,4 @@
-﻿namespace PlatesGame.State
+﻿namespace PlatesGame
 {
 	public abstract class PlayerState
 	{

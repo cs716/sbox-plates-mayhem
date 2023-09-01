@@ -1,9 +1,8 @@
-﻿using PlatesGame.util;
-using Sandbox;
+﻿using Sandbox;
 
-namespace PlatesGame.Entity;
+namespace PlatesGame;
 
-public partial class MeshEntity : Sandbox.Prop
+public partial class MeshEntity : Prop
 {
 	[Net] public string ModelString { get; set; }
 	[Net] public string Material { get; set; } = "materials/plate.vmat";

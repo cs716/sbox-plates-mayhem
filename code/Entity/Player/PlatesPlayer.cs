@@ -1,25 +1,19 @@
-﻿using System;
-using Sandbox;
+﻿using Sandbox;
 using System.ComponentModel;
-using PlatesGame.Entity;
-using Sandbox.Component;
 
-namespace PlatesGame.Entity.Player;
+namespace PlatesGame;
 
 public partial class PlatesPlayer : AnimatedEntity
 {
-	[Net] public bool Alive { get; set; } = false;
-
-	[Net] public PlateEntity OwnedPlate { get; set; }
 	
-	private bool IsThirdPerson { get; set; } = true;
-
-
+	/// <summary>
+	/// Plate variables 
+	/// </summary>
+	[Net] public PlateEntity OwnedPlate { get; set; }
 	[Net] public bool WasImpacted { get; set; } 
 
-	//[Net, Predicted]
-	//public Weapon ActiveWeapon { get; set; }
-
+	private bool IsThirdPerson { get; set; } = true;
+	
 	[ClientInput]
 	public Vector3 InputDirection { get; set; }
 	
@@ -67,48 +61,36 @@ public partial class PlatesPlayer : AnimatedEntity
 		);
 	}
 
-	public PawnController Controller { get; set; }
-	public PawnAnimator Animator { get; set;  }
-	private Glow Glow { get; set; }
+	[BindComponent] public PawnController Controller { get; }
+	[BindComponent] public PawnAnimator Animator { get; }
+	[BindComponent] public BasePlayerCamera Camera { get; }
 
-	public override Ray AimRay => new( EyePosition, EyeRotation.Forward );
-
-	public override void Spawn()
-	{
-		EnableDrawing = false;
-		EnableTouch = true;
-		Tags.Add( "player", "playerclip" );
-
-		if ( Game.IsServer )
-		{
-			SetModel( "models/citizen/citizen.vmdl" );
-			SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
-		}
-	}
-
+	public override Ray AimRay => new ( EyePosition, EyeRotation.Forward );
+	
 	public override void ClientSpawn()
 	{
 		base.ClientSpawn();
 		_ = new UI.PlayerTag( this );
 	}
+	
+	public override void Spawn()
+	{
+		SetModel( "models/citizen/citizen.vmdl" );
+		
+		EnableTouch = true;
+		EnableHideInFirstPerson = true;
+		EnableShadowInFirstPerson = true;
+	}
 
 	public void Respawn()
 	{
-		Controller = Components.GetOrCreate<PawnController>();
-		Animator = Components.GetOrCreate<PawnAnimator>();
-		Glow = Components.GetOrCreate<Glow>();
-
-		Glow.Enabled = false;
-		Glow.ObscuredColor = Color.Cyan;
-		Glow.InsideColor = Color.Cyan;
-		Glow.Color = Color.Blue;
-		
+		Components.Create<PawnController>();
+		Components.Create<PawnAnimator>();
+		Components.GetOrCreate<PawnCamera>();
+		SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
 		Health = 100f;
 		
-		EnableDrawing = true;
-		EnableHideInFirstPerson = true;
-		EnableShadowInFirstPerson = true;
-		
+		Tags.Add("player");
 		LifeState = LifeState.Alive;
 		Controller.Gravity = GameConfig.DefaultGravity;
 	}
@@ -118,40 +100,40 @@ public partial class PlatesPlayer : AnimatedEntity
 	{
 		if ( Game.IsServer )
 		{
-			if ( Position.z <= -2000f && Alive)
+			if ( Position.z <= -2000f && LifeState is LifeState.Alive)
 			{
+				if ( PlatesGame.CurrentState is WaitingState )
+				{
+					PlateManager.ReturnPlayerToPlate( this );
+					return;
+				}
 				Log.Info($"{Client.Name} has died"  );
 				Kill();
 			}
 		}
 		else
 		{
-			EnableDrawing = Alive;
-			if (Glow != null)
-				Glow.Enabled = WasImpacted;
-
+			EnableDrawing = LifeState is LifeState.Alive;
 		}
 	}
 
 	public void Kill()
 	{
-		if ( Alive ) // Player is alive in the game - Send to spectate
+		if ( LifeState is LifeState.Alive ) // Player is alive in the game - Send to spectate
 		{
 			OnKilled();
-		}
-		else // Player died while spectating. Noob down
-		{
-			
 		}
 	}
 
 	public override void OnKilled()
 	{
-		Alive = false;
 		LifeState = LifeState.Dead;
+		var killPlate = PlatesGame.CurrentState?.OnPlayerDeath(this);
+		if ( killPlate is not null && killPlate == false )
+			return;
 		
 		OwnedPlate?.Kill();
-		PlatesGame.CurrentState?.OnPlayerDeath(this);
+		Components.GetOrCreate<SpectatorCamera>();
 	}
 
 	public void DressFromClient( IClient cl )
@@ -160,78 +142,36 @@ public partial class PlatesPlayer : AnimatedEntity
 		c.LoadFromClient( cl );
 		c.DressEntity( this );
 	}
-
-	public void ResetValues(bool changeProperties = true)
-	{
-		if ( !changeProperties )
-		{
-			return;
-		}
-
-		Scale = 1.0f;
-		RenderColor = Color.White;
-		Velocity = Vector3.Zero;
-	}
 	
 	public override void Simulate( IClient cl )
 	{
 		SimulateRotation();
 		Controller?.Simulate( cl );
 		Animator?.Simulate();
-		EyeLocalPosition = Vector3.Up * (64f * Scale);
-
-		//DebugOverlay.Box(Position, Hull.Mins, Hull.Maxs, Color.Green);
+		//EyeLocalPosition = Vector3.Up * (64f * Scale);
 	}
-
-	private int MouseWheelDistance = 0;
+	
 	public override void FrameSimulate( IClient cl )
 	{
 		SimulateRotation();
-
-		Camera.Rotation = ViewAngles.ToRotation();
-		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( Game.Preferences.FieldOfView );
-
-		MouseWheelDistance = Math.Clamp(MouseWheelDistance + Input.MouseWheel*10, -500, 80);
-		//DebugOverlay.ScreenText( "MWheel: " + MouseWheelDistance, 0 );
-
-		IsThirdPerson = MouseWheelDistance < 80;
-
-		/*if ( Input.Pressed( "view" ) )
-		{
-			IsThirdPerson = !IsThirdPerson;
-		}*/
-
-		if ( IsThirdPerson )
-		{
-			var pos = Position + Vector3.Up * 64;
-			var rot = Camera.Rotation * Rotation.FromAxis( Vector3.Up, -16 );
-
-			var distance = (80.0f * Scale) + -MouseWheelDistance;
-			//var targetPos = pos + rot.Right * ((CollisionBounds.Mins.x + 50) * Scale);
-			var targetPos = pos;
-			targetPos += rot.Forward * -distance;
-
-			var tr = Trace.Ray( pos, targetPos )
-				.WithAnyTags( "solid" )
-				.Ignore( this )
-				.Radius( 8 )
-				.Run();
-			
-			Camera.FirstPersonViewer = null;
-			Camera.Position = tr.EndPosition;
-		}
-		else
-		{
-			Camera.FirstPersonViewer = this;
-			Camera.Position = EyePosition;
-		}
+		Camera?.Update();
+	}
+	
+	public override void BuildInput()
+	{
+		Camera?.BuildInput();
+	}
+	protected void SimulateRotation()
+	{
+		EyeRotation = ViewAngles.ToRotation();
+		Rotation = ViewAngles.WithPitch( 0f ).ToRotation();
 	}
 	
 	public TraceResult TraceBBox( Vector3 start, Vector3 end, float liftFeet = 0.0f )
 	{
 		return TraceBBox( start, end, Hull.Mins, Hull.Maxs, liftFeet );
 	}
-	
+
 	public TraceResult TraceBBox( Vector3 start, Vector3 end, Vector3 mins, Vector3 maxs, float liftFeet = 0.0f )
 	{
 		if ( liftFeet > 0 )
@@ -247,31 +187,5 @@ public partial class PlatesPlayer : AnimatedEntity
 			.Run();
 
 		return tr;
-	}
-	
-	public override void BuildInput()
-	{
-		InputDirection = Input.AnalogMove;
-
-		if ( Input.StopProcessing )
-			return;
-
-		var look = Input.AnalogLook;
-
-		if ( ViewAngles.pitch > 90f || ViewAngles.pitch < -90f )
-		{
-			look = look.WithYaw( look.yaw * -1f );
-		}
-
-		var viewAngles = ViewAngles;
-		viewAngles += look;
-		viewAngles.pitch = viewAngles.pitch.Clamp( -89f, 89f );
-		viewAngles.roll = 0f;
-		ViewAngles = viewAngles.Normal;
-	}
-	private void SimulateRotation()
-	{
-		EyeRotation = ViewAngles.ToRotation();
-		Rotation = ViewAngles.WithPitch( 0f ).ToRotation();
 	}
 }

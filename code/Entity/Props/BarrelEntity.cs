@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
-using PlatesGame.Entity.Player;
-using PlatesGame.util;
-using Sandbox;
+﻿using Sandbox;
 
-namespace PlatesGame.Entity.Props;
+namespace PlatesGame;
 
 public class BarrelEntity : Prop
 {
@@ -14,7 +10,7 @@ public class BarrelEntity : Prop
 		EnableTouch = true;
 		EnableAllCollisions = true;
 		Invulnerable = 100f;
-		Tags.Add( "trigger" );
+		Tags.Add( "trigger", "solid" );
 		SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
 	}
 	private float BlastRadius { get; set; } = 80f;
@@ -24,7 +20,7 @@ public class BarrelEntity : Prop
 
 	private bool Exploded; 
 
-	public override void Touch( Sandbox.Entity other )
+	public override void Touch( Entity other )
 	{
 		base.Touch( other );
 

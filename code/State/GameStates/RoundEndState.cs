@@ -1,6 +1,6 @@
 ﻿using Sandbox;
 
-namespace PlatesGame.State.GameStates;
+namespace PlatesGame;
 
 public partial class RoundEndState : CooldownState
 {

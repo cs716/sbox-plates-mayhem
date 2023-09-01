@@ -1,8 +1,4 @@
-﻿using System;
-using System.Security.Cryptography;
-using Sandbox;
-
-namespace PlatesGame.util;
+﻿namespace PlatesGame;
 
 public abstract class MathC
 {
