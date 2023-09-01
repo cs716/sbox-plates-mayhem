@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using PlatesGame.Entity;
 using Sandbox;
 
-namespace PlatesGame.util;
+namespace PlatesGame;
 
 public partial class VertexMeshBuilder
 {

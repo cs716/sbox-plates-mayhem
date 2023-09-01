@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
-using PlatesGame.Entity.Player;
-using PlatesGame.Entity.Props;
 using Sandbox;
 
-namespace PlatesGame.Event.Events.Arena;
+namespace PlatesGame;
 
 public class BarrelRainEvent : BaseEvent
 {
@@ -27,7 +25,7 @@ public class BarrelRainEvent : BaseEvent
 		if ( Game.IsClient )
 			return;
 		
-		foreach (var prop in Sandbox.Entity.All.Where(p => p.Tags.Has("eventProp"  )  ))
+		foreach (var prop in Entity.All.Where(p => p.Tags.Has("eventProp"  )  ))
 		{
 			prop.DeleteAsync(1f);
 		}
@@ -55,7 +53,7 @@ public class BarrelRainEvent : BaseEvent
 			Health = 1f
 		};
 		if ( slamPlayerChance == 1 ) // Unlucky, Slam that shit on someones head
-			barrel.Position = (Vector3)Sandbox.Entity.All.OfType<PlatesPlayer>().Where( p => p.Alive )
+			barrel.Position = (Vector3)Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState == LifeState.Alive )
 				.OrderBy( x => Random.Shared.Double( 1, 100 ) ).First()?.Position.WithZ( 5000 );
 		barrel.SetModel("models/sbox_props/oil_drum/oil_drum_explosive.vmdl_c");
 		barrel.Tags.Add("eventProp");

@@ -1,8 +1,6 @@
-﻿using PlatesGame.Entity.Player;
-using PlatesGame.util;
-using Sandbox;
+﻿using Sandbox;
 
-namespace PlatesGame.Entity.Props;
+namespace PlatesGame;
 
 public class LandmineEntity : Prop
 {
@@ -17,6 +15,7 @@ public class LandmineEntity : Prop
 
 		SetModel( "models/landmine.vmdl" );
 		SetupPhysicsFromModel( PhysicsMotionType.Dynamic );
+		Tags.Add( "solid", "trigger" );
 		Name = "Landmine";
 		RenderColor = RenderColor.WithAlpha( 0f );
 		EnableAllCollisions = false;

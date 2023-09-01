@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PlatesGame.Entity;
-using PlatesGame.Entity.Props;
-using PlatesGame.State.GameStates;
-using PlatesGame.util;
 using Sandbox;
 
-namespace PlatesGame.Event.Events.Players;
+namespace PlatesGame;
 
 public partial class LavaSpinnerEvent : BaseEvent
 {

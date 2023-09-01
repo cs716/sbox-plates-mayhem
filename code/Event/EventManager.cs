@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PlatesGame.Event.Events;
-using PlatesGame.Event.Events.Arena;
-using PlatesGame.Event.Events.Player;
-using PlatesGame.Event.Events.Players;
 using Sandbox;
 
-namespace PlatesGame.Event;
+namespace PlatesGame;
 
 public class EventManager
 {

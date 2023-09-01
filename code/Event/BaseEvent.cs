@@ -1,10 +1,8 @@
-﻿using System.Linq;
-using PlatesGame.Entity;
-using PlatesGame.Entity.Player;
-using PlatesGame.util;
+﻿using System;
+using System.Linq;
 using Sandbox;
 
-namespace PlatesGame.Event;
+namespace PlatesGame;
 
 public abstract partial class BaseEvent : BaseNetworkable
 {
@@ -21,11 +19,16 @@ public abstract partial class BaseEvent : BaseNetworkable
 
 	public bool HasExited { get; private set; }
 
-	public virtual void OnEnter() {}
+	public string Seed { get; set; }
+
+	public virtual void OnEnter()
+	{
+		Seed = Name + Random.Shared.NextSingle();
+	}
 
 	public virtual void OnExit()
 	{
-		foreach ( var player in Sandbox.Entity.All.OfType<PlatesPlayer>() )
+		foreach ( var player in Entity.All.OfType<PlatesPlayer>() )
 			player.WasImpacted = false;
 
 		foreach ( var plate in PlateManager.Plates() )

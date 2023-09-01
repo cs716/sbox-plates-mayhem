@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading;
-using PlatesGame.util;
 using Sandbox;
 using Sandbox.Component;
 
-namespace PlatesGame.Entity;
+namespace PlatesGame;
 
 public sealed partial class PlateEntity : MeshEntity
 {
@@ -16,7 +13,7 @@ public sealed partial class PlateEntity : MeshEntity
     
     [Net] public bool WasImpacted { get; set; }
 
-    [Net] public IList<Sandbox.Entity> PlateEnts {get; set;}
+    [Net] public IList<Entity> PlateEnts {get; set;}
     [Net] private Vector3 TargetPosition {get;set;}
     [Net] private Rotation TargetRotation {get;set;}
     [Net] private RealTimeSince MovementTime {get;set;}
@@ -140,7 +137,7 @@ public sealed partial class PlateEntity : MeshEntity
         SetupPhysicsFromModel(motionType);
     }
 
-    public void AddEntity(Sandbox.Entity ent, bool setTransform = false)
+    public void AddEntity(Entity ent, bool setTransform = false)
     {
         if(setTransform) ent.Parent = this;
         PlateEnts.Add(ent);
@@ -217,7 +214,7 @@ public sealed partial class PlateEntity : MeshEntity
         return ToScale.z;
     }
 
-    public override void StartTouch(Sandbox.Entity other)
+    public override void StartTouch(Entity other)
     {
         base.StartTouch(other);
 

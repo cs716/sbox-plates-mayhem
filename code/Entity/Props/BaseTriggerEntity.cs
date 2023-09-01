@@ -1,12 +1,12 @@
 ﻿using System;
 using Sandbox;
 
-namespace PlatesGame.Entity.Props;
+namespace PlatesGame;
 
 public class BaseTriggerEntity : ModelEntity
 {
-	public Func<Sandbox.Entity, bool> Trigger;
-	public Sandbox.Entity Holder;
+	public Func<Entity, bool> Trigger;
+	public Entity Holder;
 	public bool Enabled = false;
 
 	public override void Spawn()
@@ -42,7 +42,7 @@ public class BaseTriggerEntity : ModelEntity
 			Delete();
 	}
 
-	public override void Touch(Sandbox.Entity other)
+	public override void Touch(Entity other)
 	{
 		base.Touch(other);
 		

@@ -2,12 +2,6 @@
 using Sandbox.Diagnostics;
 using System;
 using System.Linq;
-using PlatesGame.Entity;
-using PlatesGame.Entity.Player;
-using PlatesGame.Event;
-using PlatesGame.State;
-using PlatesGame.State.GameStates;
-using PlatesGame.util;
 
 //
 // You don't need to put things in a namespace, but it doesn't hurt.
@@ -59,10 +53,10 @@ partial class PlatesGame : GameManager
 	{
 		if ( CurrentState is EventState)
 		{
-			if ( Instance._lastEvent != CurrentEvent?.Name )
+			if ( Instance._lastEvent != CurrentEvent?.Seed )
 			{
 				Log.Info($"{(Game.IsServer ? "SERVER" : "CLIENT")} Event changed to: {CurrentEvent?.Name} - It was previously {Instance._lastEvent}"  );
-				Instance._lastEvent = CurrentEvent?.Name;
+				Instance._lastEvent = CurrentEvent?.Seed;
 
 				if ( Game.IsClient )
 					PlayerHud.SetLargeNotification( CurrentEvent?.Name, CurrentEvent?.Description, 5f );
@@ -106,6 +100,8 @@ partial class PlatesGame : GameManager
 		var pawn = new PlatesPlayer();
 		client.Pawn = pawn;
 		pawn.DressFromClient( client );
+		if ( client.IsBot )
+			pawn.Tags.Add( "input_disabled" );
 		
 		CurrentState?.OnPlayerConnect( client );
 	}
@@ -156,7 +152,6 @@ partial class PlatesGame : GameManager
 				{
 					ply.Respawn();
 					ply.OwnedPlate = plate;
-					ply.Alive = true;
 					ply.Position = plate.Position + Vector3.Up * 100.0f;
 					ply.BaseVelocity = Vector3.Zero;
 					ply.Velocity = Vector3.Zero;

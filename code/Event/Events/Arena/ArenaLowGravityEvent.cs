@@ -1,8 +1,7 @@
 ﻿using System.Linq;
-using PlatesGame.Entity.Player;
 using Sandbox;
 
-namespace PlatesGame.Event.Events.Arena;
+namespace PlatesGame;
 
 public class ArenaLowGravityEvent : BaseEvent
 {
@@ -20,7 +19,7 @@ public class ArenaLowGravityEvent : BaseEvent
 		if ( Game.IsClient )
 			return;
 		
-		foreach (var player in Sandbox.Entity.All.OfType<PlatesPlayer>().Where( p => p.Alive  ))
+		foreach (var player in Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive  ))
 		{
 			player.Controller.Gravity -= GameConfig.DefaultGravity * 0.5f;
 		}
@@ -34,7 +33,7 @@ public class ArenaLowGravityEvent : BaseEvent
 		if ( Game.IsClient )
 			return;
 		
-		foreach (var player in Sandbox.Entity.All.OfType<PlatesPlayer>().Where(p => p.Controller?.Gravity.AlmostEqual( GameConfig.DefaultGravity ) == false ))
+		foreach (var player in Entity.All.OfType<PlatesPlayer>().Where(p => p.Controller?.Gravity.AlmostEqual( GameConfig.DefaultGravity ) == false ))
 		{
 			player.Controller.Gravity = GameConfig.DefaultGravity;
 		}

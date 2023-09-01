@@ -1,4 +1,4 @@
-﻿namespace PlatesGame.Event.Events;
+﻿namespace PlatesGame;
 
 public class SafeEvent : BaseEvent
 {

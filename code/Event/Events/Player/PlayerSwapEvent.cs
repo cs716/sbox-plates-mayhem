@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using PlatesGame.Entity.Player;
-using PlatesGame.State.GameStates;
-using PlatesGame.util;
 using Sandbox;
 
-namespace PlatesGame.Event.Events.Player;
+namespace PlatesGame;
 
 public sealed class PlayerSwapEvent : BaseEvent
 {
@@ -33,7 +30,7 @@ public sealed class PlayerSwapEvent : BaseEvent
 		EventOperationsComplete = false;
 		
 		EventDelay = Random.Shared.Float( 5f, 25f ); // Make it random so players don't just throw themselves off of their plates
-		var playerCount = Sandbox.Entity.All.OfType<PlatesPlayer>().Count( p => p.Alive );
+		var playerCount = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
 		var maxImpacted = playerCount - (playerCount % 2);
 		var randomSwaps = Random.Shared.Int( MinAffected, maxImpacted );
 
@@ -47,7 +44,7 @@ public sealed class PlayerSwapEvent : BaseEvent
 
 	private void PerformSwaps()
 	{
-		foreach (var pair in PlayerPairs.Where(pair => pair.Player1?.Alive == true && pair.Player2?.Alive == true))
+		foreach (var pair in PlayerPairs.Where(pair => pair.Player1?.LifeState is LifeState.Alive && pair.Player2?.LifeState is LifeState.Alive))
 		{
 			var p1Pos = pair.Player1.Position;
 			var p2Pos = pair.Player2.Position;
@@ -69,9 +66,9 @@ public sealed class PlayerSwapEvent : BaseEvent
 
 	private void AssignPlayers()
 	{
-		var players = Sandbox.Entity.All
+		var players = Entity.All
 			.OfType<PlatesPlayer>()
-			.Where( p => p.Alive )
+			.Where( p => p.LifeState is LifeState.Alive )
 			.OrderBy( x => Random.Shared.Double( 1, 100 ) )
 			.ToList();
 		

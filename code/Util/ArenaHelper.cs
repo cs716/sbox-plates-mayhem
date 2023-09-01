@@ -1,11 +1,11 @@
 ﻿using System;
 using Sandbox;
 
-namespace PlatesGame.util;
+namespace PlatesGame;
 
 public class ArenaHelper
 {
-	public static void Explosion( Sandbox.Entity owner, Vector3 position, float radius, float damage, float forceScale, bool createEffects)
+	public static void Explosion( Entity owner, Vector3 position, float radius, float damage, float forceScale, bool createEffects)
 	{
 		// Effects
 		if ( createEffects )
@@ -17,7 +17,7 @@ public class ArenaHelper
 		//DebugOverlay.Sphere(position, radius, Color.Red, 2f);
 		
 		// Damage, etc
-		var overlaps = Sandbox.Entity.FindInSphere( position, radius );
+		var overlaps = Entity.FindInSphere( position, radius );
 
 		foreach ( var overlap in overlaps )
 		{

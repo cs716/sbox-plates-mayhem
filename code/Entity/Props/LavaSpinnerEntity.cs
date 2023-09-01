@@ -1,6 +1,6 @@
 ﻿using Sandbox;
 
-namespace PlatesGame.Entity.Props;
+namespace PlatesGame;
 
 public class LavaSpinnerEntity : ModelEntity
 {
@@ -26,7 +26,7 @@ public class LavaSpinnerEntity : ModelEntity
 
 	private RealTimeUntil NextDamageAllowed = 1;
 
-	public override void Touch( Sandbox.Entity other )
+	public override void Touch( Entity other )
 	{
 		base.Touch( other );
 		

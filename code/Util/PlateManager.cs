@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using PlatesGame.Entity;
-using PlatesGame.Entity.Player;
 using Sandbox;
 // ReSharper disable CheckNamespace
 
-namespace PlatesGame.util;
+namespace PlatesGame;
 
 public static class PlateManager
 {
 	public static IEnumerable<PlateEntity> Plates()
 	{
-		return Sandbox.Entity.All.OfType<PlateEntity>();
+		return Entity.All.OfType<PlateEntity>();
 	}
 
 	public static void CreateBoard()
@@ -37,6 +34,19 @@ public static class PlateManager
 		}
 	}
 
+	public static void ReturnPlayerToPlate( PlatesPlayer player )
+	{
+		var plate = player.OwnedPlate;
+		if ( plate is null || !plate.IsValid() )
+		{
+			return;
+		}
+
+		player.Position = plate.Position + Vector3.Up * 100.0f;
+		player.BaseVelocity = Vector3.Zero;
+		player.Velocity = Vector3.Zero;
+	}
+
 	private static void AssignPlate( PlatesPlayer player, PlateEntity plate )
 	{
 		if ( Game.IsClient )
@@ -47,7 +57,6 @@ public static class PlateManager
 		plate.EnableDrawing = true;
 		plate.IsDead = false;
 		player.OwnedPlate = plate;
-		player.Alive = true;
 		player.Position = plate.Position + Vector3.Up * 100.0f;
 		player.BaseVelocity = Vector3.Zero;
 		player.Velocity = Vector3.Zero;
@@ -69,7 +78,7 @@ public static class PlateManager
 
 	private static PlateEntity FindEmptyPlate()
 	{
-		return Sandbox.Entity.All
+		return Entity.All
 			.OfType<PlateEntity>()
 			.First( p => p.PlateOwner == null );
 	}
@@ -91,7 +100,7 @@ public static class PlateManager
 
 	public static void CleanUnusedPlates()
 	{
-		foreach (var plate in Sandbox.Entity.All.OfType<PlateEntity>().Where(p => p.PlateOwner == null  ))
+		foreach (var plate in Entity.All.OfType<PlateEntity>().Where(p => p.PlateOwner == null  ))
 		{
 			plate.Delete();
 		}
