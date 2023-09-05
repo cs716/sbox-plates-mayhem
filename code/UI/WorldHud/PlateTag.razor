@@ -17,6 +17,11 @@
 		return; 
 	}
 	
+	@if ( Plate.WasImpacted )
+	{
+		<label @ref="ImpactedLabel" style="color: yellow;" class="ImpactedLabel">warning</label>
+	}
+	
 	@if ( Plate.PlateOwner != Game.LocalClient )
 	{
 		<label class="name">@(Plate.PlateOwner.Name.ToLower().EndsWith( 's' ) ? Plate.PlateOwner?.Name + "'" : Plate.PlateOwner?.Name + "'s") plate</label>
@@ -30,6 +35,8 @@
 @code {
 
 	private PlateEntity Plate => Entity as PlateEntity;
+	
+	private Label ImpactedLabel { get; set; }
 
 	public PlateTag( PlateEntity plate ) : base( plate, Vector3.Up * 15f )
 	{
@@ -38,7 +45,7 @@
 	
 	protected override int BuildHash()
 	{
-		return HashCode.Combine(Plate.PlateOwner?.Name, Plate?.LifeState.ToString(), Style.Display.ToString());
+		return HashCode.Combine(Plate?.WasImpacted, Plate?.PlateOwner?.Name, Plate?.LifeState.ToString(), Style.Display.ToString());
 	}
 
 	public override void Tick()

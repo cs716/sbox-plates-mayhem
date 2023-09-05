@@ -12,11 +12,16 @@
 }
 
 <root>
+	@if ( player.WasImpacted)
+	{
+		<label @ref="ImpactedLabel" style="color: yellow;" class="ImpactedLabel">expand_more</label>
+	}
 	@if ( !player.IsLocalPawn )
 	{
 		<label class="name">@Player.Client.Name</label>
 	}
-	<div class="healthbar">
+	
+	<div @ref="HealthBar" class="healthbar">
 		<div @ref="HealthInner" class="inner"></div>
 	</div>
 
@@ -25,10 +30,14 @@
 @code {
 	
 	private Panel HealthInner { get; set; }
+	private Panel HealthBar { get; set; }
 
 	private PlatesPlayer Player => Entity as PlatesPlayer;
 
-	private const float TransitionRate = 50f;
+	private RealTimeSince OwnHealthBarChanged;
+	private float _lastHealth;
+
+	private Label ImpactedLabel { get; set; }
 
 	public PlayerTag( PlatesPlayer player ) : base( player, Vector3.Up * 85f )
 	{
@@ -37,7 +46,7 @@
 	
 	protected override int BuildHash()
 	{
-		return HashCode.Combine(Player?.Name, Player?.Health, Player?.LifeState.ToString(), Style.Display.ToString());
+		return HashCode.Combine(HealthBar.Style.Opacity, Player?.WasImpacted.ToString(), Player?.Name, Player?.Health, Player?.LifeState.ToString(), Style.Display.ToString());
 	}
 
 	public override void Tick()
@@ -66,6 +75,14 @@
 			_ => Color.Red
 			};
 		Style.Display = (Game.LocalPawn.LifeState == LifeState.Alive) ? DisplayMode.Flex : DisplayMode.None;
+
+		if ( !_lastHealth.AlmostEqual( Player.Health ) )
+		{
+			_lastHealth = Player.Health;
+			OwnHealthBarChanged = 0;
+		}
+
+		HealthBar.Style.Opacity = !Player.IsLocalPawn || OwnHealthBarChanged < 5f ? 1 : 0;
 	}
 
 }
