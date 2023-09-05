@@ -20,15 +20,22 @@ public class EventManager
 
 	public EventManager()
 	{
+		// Safe
 		AddEvent( new SafeEvent() );
+		
+		// Arena
 		AddEvent( new ArenaHighGravityEvent() );
 		AddEvent( new ArenaLowGravityEvent() );
-		AddEvent( new PlayerSwapEvent() );
 		AddEvent( new BarrelRainEvent() );
+		
+		// Plate
 		AddEvent( new LavaSpinnerEvent() );
 		AddEvent( new LandmineEvent() );
-		AddEvent( new PlateShrinkEvent() );
 		AddEvent( new PlateGrowEvent() );
+		AddEvent( new PlateShrinkEvent() );
+		
+		// Player
+		AddEvent( new PlayerSwapEvent() );
 	}
 
 	private void AddEvent(BaseEvent newEvent) {

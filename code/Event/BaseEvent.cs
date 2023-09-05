@@ -19,7 +19,7 @@ public abstract partial class BaseEvent : BaseNetworkable
 
 	public bool HasExited { get; private set; }
 
-	public string Seed { get; set; }
+	[Net] public string Seed { get; set; }
 
 	public virtual void OnEnter()
 	{

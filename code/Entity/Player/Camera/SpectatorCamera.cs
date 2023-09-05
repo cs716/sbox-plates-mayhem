@@ -7,11 +7,11 @@ public class SpectatorCamera : BasePlayerCamera
 {
 	private enum SpectatorCameraMode
 	{
-		FREECAM,
-		SPECTATE
+		Freecam,
+		Spectate
 	}
 
-	private SpectatorCameraMode CameraMode = SpectatorCameraMode.FREECAM;
+	private SpectatorCameraMode CameraMode = SpectatorCameraMode.Freecam;
 	
 	/// <summary>
 	/// Variables for FreeCamera
@@ -38,7 +38,7 @@ public class SpectatorCamera : BasePlayerCamera
 		_moveSpeed = 1f;
 		_moveInput = Input.AnalogMove;
 
-		if ( CameraMode == SpectatorCameraMode.FREECAM )
+		if ( CameraMode == SpectatorCameraMode.Freecam )
 		{
 			if ( Input.Down( "run" ) )
 				_moveSpeed = 5f;
@@ -71,7 +71,7 @@ public class SpectatorCamera : BasePlayerCamera
 			Entity.InputDirection = Input.AnalogMove;
 			
 			if ( Input.Down( "jump" ) )
-				CameraMode = SpectatorCameraMode.FREECAM;
+				CameraMode = SpectatorCameraMode.Freecam;
 		}
 		
 		if ( Input.Pressed( "attack1" ) )
@@ -99,13 +99,13 @@ public class SpectatorCamera : BasePlayerCamera
 			if ( livingPlayers.Any() )
 				_currentFollowingPawn = livingPlayers.First();
 			else
-				CameraMode = SpectatorCameraMode.FREECAM; // Fail back to FreeCam if we can't find a player
+				CameraMode = SpectatorCameraMode.Freecam; // Fail back to FreeCam if we can't find a player
 		}
 	}
 	
 	private void PreviousSpectatePlayer()
 	{
-		CameraMode = SpectatorCameraMode.SPECTATE;
+		CameraMode = SpectatorCameraMode.Spectate;
 		var currentId = (_currentFollowingPawn is null || !_currentFollowingPawn.IsValid())
 			? -1
 			: _currentFollowingPawn.NetworkIdent;
@@ -121,13 +121,13 @@ public class SpectatorCamera : BasePlayerCamera
 			if ( livingPlayers.Any() )
 				_currentFollowingPawn = livingPlayers.First();
 			else
-				CameraMode = SpectatorCameraMode.FREECAM; // Fail back to FreeCam if we can't find a player
+				CameraMode = SpectatorCameraMode.Freecam; // Fail back to FreeCam if we can't find a player
 		}
 	}
 
 	public override void Update( )
 	{
-		if ( CameraMode == SpectatorCameraMode.FREECAM )
+		if ( CameraMode == SpectatorCameraMode.Freecam )
 		{
 			var mv = _moveInput.Normal * BaseMoveSpeed * RealTime.Delta * Camera.Rotation * _moveSpeed;
 
