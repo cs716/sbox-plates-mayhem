@@ -1,0 +1,78 @@
+@namespace PlatesGame.UI
+@using System
+@using Sandbox
+@using Sandbox.UI
+
+@inherits Sandbox.UI.Panel
+
+@attribute [StyleSheet]
+
+<root>
+	<label class="header" @ref="Title"></label>
+	<label class="subtext" @ref="Subtitle"></label>
+</root>
+
+@code {
+
+	private readonly bool _useEventDetails;
+	
+	private Label Title;
+	private Label Subtitle;
+
+	private readonly string _title;
+	private readonly string _subtitle;
+	
+	private readonly RealTimeUntil DisplayTime;
+	private RealTimeUntil _deleteTime; 
+
+	public LargeNotification(float displayTime)
+	{
+		_useEventDetails = true;
+		DisplayTime = displayTime;
+	}
+
+	public LargeNotification( string title, string subtitle, float displayTime )
+	{
+		_title = title;
+		_subtitle = subtitle;
+		_useEventDetails = false;
+		DisplayTime = displayTime; 
+	}
+	
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( Title, Subtitle );
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+
+		if ( _useEventDetails )
+		{
+			if ( Title.Text != PlatesGame.EventDetails.EventName || Subtitle.Text != PlatesGame.EventDetails.EventDescription )
+			{
+				Title.Text = PlatesGame.EventDetails.EventName;
+				Subtitle.Text = PlatesGame.EventDetails.EventDescription;
+			}
+		}
+		else
+		{
+			if ( Title.Text != _title || Subtitle.Text != _subtitle )
+			{
+				Title.Text = _title;
+				Subtitle.Text = _subtitle;
+			}
+		}
+
+		if ( _deleteTime && HasClass( "fadeOut" ) )
+			Delete(true);
+
+		if ( !DisplayTime || HasClass( "fadeOut" ) ) 
+			return;
+		
+		_deleteTime = 1f;
+		AddClass( "fadeOut" );
+	}
+
+}

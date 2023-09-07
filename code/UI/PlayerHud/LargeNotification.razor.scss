@@ -1,0 +1,50 @@
+﻿LargeNotification {
+  font-family: RussoOne;
+  font-weight: bold;
+  color:#fff;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    font-size: 64px;
+  }
+
+  .subtext {
+    font-size: 32px;
+  }
+
+  text-align: center;
+  position: absolute;
+  width: 110%;
+  left: -5%;
+  top: 10%;
+  background-color: rgba(0, 0, 183, 0.5);
+  border: 2px solid #FFF;
+  text-shadow: 1px 1px 4px black;
+  backdrop-filter: blur(5px);
+  
+  &:not(.fadeOut) {
+    animation: fadeIn 0.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+  }
+  
+  &.fadeOut {
+    animation: fadeOut 1s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+  }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}

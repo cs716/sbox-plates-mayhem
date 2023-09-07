@@ -1,0 +1,37 @@
+﻿WaitingMenu {
+  font-family: RussoOne;
+  align-items: center;
+  top: 5px;
+  right: 5px;
+  position: absolute;
+  .mainText {
+    animation: wobble 1s linear infinite alternate-reverse;
+  }
+  
+  .hourglass {
+    border: 10px solid #FFF;
+    border-radius: 50%;
+    border-top: 10px solid #7287ff;
+    width: 50px;
+    height: 50px;
+    animation: spinner 1s linear infinite;
+    margin-right: 25px;
+  }
+}
+
+@keyframes wobble {
+  0% { transform: scale(1); }
+  100% { transform: scale(.98); }
+}
+
+@keyframes hgRotate {
+  0% { transform: rotateX(0deg); }
+  25% { transform: rotateX(180deg); }
+  75% { transform: rotateX(180deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+@keyframes spinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

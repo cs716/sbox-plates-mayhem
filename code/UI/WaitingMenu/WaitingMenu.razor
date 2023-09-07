@@ -1,15 +1,20 @@
 ﻿@namespace PlatesGame.UI
 @using System
+@using Sandbox.UI
 @inherits Sandbox.UI.Panel 
+
+@attribute [StyleSheet]
 
 <root>
 	@if ( GetConnectedPlayers() < GameConfig.MinimumPlayers )
 	{
-		<p class="title center-screen white">Waiting for @(GameConfig.MinimumPlayers - GetConnectedPlayers()) more player@(GameConfig.MinimumPlayers - GetConnectedPlayers() > 1 ? "s" : "") to begin!</p>
+		<label style="font-size: 48px;" class="title white hourglass"></label>
+		<label class="title white mainText">Waiting for @(GameConfig.MinimumPlayers - GetConnectedPlayers()) more player@(GameConfig.MinimumPlayers - GetConnectedPlayers() > 1 ? "s" : "") to begin ..</label>
 	}
 	else
 	{
-		<p class="title center-screen white">Get ready! The round will begin in @GetCountdown()!</p>
+		<label class="title white mainText" style="font-size: 100px;margin-right: 10px;">@GetCountdown()</label>
+		<label class="title white">Get ready! The round is about to begin</label>
 	}
 </root>
 
@@ -20,16 +25,16 @@
 		return HashCode.Combine( GetConnectedPlayers(), GetCountdown() );
 	}
 
-	private double GetCountdown()
+	private static double GetCountdown()
 	{
 		if ( PlatesGame.CurrentState is WaitingState state )
 		{
-			return Math.Clamp( Math.Ceiling( state.NextStateRealTime.Relative ), 0, 100 );
+			return Math.Clamp( Math.Ceiling( state.StartRoundTime ), 1, 100 );
 		}
 		return 0;
 	}
 
-	private int GetConnectedPlayers()
+	private static int GetConnectedPlayers()
 	{
 		if ( PlatesGame.CurrentState is WaitingState state )
 		{

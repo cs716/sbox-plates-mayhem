@@ -8,6 +8,8 @@ public class BarrelRainEvent : BaseEvent
 {
 	public override EventManager.EventType EventType => EventManager.EventType.ArenaEvent;
 	public override double EventWeight => 1d;
+	
+	public override float EventDuration => 30f;
 
 	public override string Name => "Explosive Barrel Rain";
 
@@ -15,7 +17,7 @@ public class BarrelRainEvent : BaseEvent
 	{
 		base.OnEnter();
 		
-		Description = "Explosive barrels will fall from the heavens!";
+		PlatesGame.EventDetails.EventDescription = "Explosive barrels will fall from the heavens! Try to avoid them!";
 	}
 
 	public override void OnExit()

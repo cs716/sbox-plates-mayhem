@@ -9,13 +9,9 @@ public partial class LavaSpinnerEvent : BaseEvent
 {
 	public override double EventWeight => 1d;
 	public override int MinAffected => 1;
-
-	private RealTimeUntil StartDelay;
-	private bool PropsCreated;
-
 	public override string Name => "Lava Wheel";
-	
-	private ICollection<PlateEntity> ImpactedPlates { get; set; } = new List<PlateEntity>();
+
+	public override float EventBeginDelay => 10f;
 
 	public override void OnEnter()
 	{
@@ -23,11 +19,6 @@ public partial class LavaSpinnerEvent : BaseEvent
 		
 		if ( Game.IsClient )
 			return;
-		
-		StartDelay = 5f;
-		PropsCreated = false;
-
-		ImpactedPlates.Clear();
 		
 		var livingPlates = PlateManager.Plates().Where( p => !p.IsDead ).OrderBy( x => Random.Shared.Double( 1, 100 ) ).ToList();
 		MaxAffected = livingPlates.Count;
@@ -37,27 +28,21 @@ public partial class LavaSpinnerEvent : BaseEvent
 		
 		for ( var i = 0; i < numPlatesImpacted; i++ )
 		{
-			ImpactedPlates.Add(livingPlates[i]);
-			livingPlates[i].WasImpacted = true;
+			PlatesGame.EventDetails.AffectedEntities.Add( livingPlates[i] );
 			playerNames.Add( livingPlates[i].OwnerName );
 		}
 		
-		Description = $"Lava spinners will spawn on the plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )}! Jump to avoid them!";
+		PlatesGame.EventDetails.EventDescription = $"Lava spinners will spawn on the plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )}! Jump to avoid them!";
 	}
 
-	public override void OnTick()
+	public override void EventBegin()
 	{
-		base.OnTick();
+		base.EventBegin();
 
-		if ( !Game.IsServer )
-		{
-			return;
-		}
-
-		if ( !StartDelay || PropsCreated )
+		if ( Game.IsClient )
 			return;
 		
-		foreach (var plate in ImpactedPlates)
+		foreach (var plate in PlatesGame.EventDetails.AffectedEntities.OfType<PlateEntity>().Where(p => !p.IsDead  ))
 		{
 			var spinner = new LavaSpinnerEntity
 			{
@@ -70,12 +55,10 @@ public partial class LavaSpinnerEvent : BaseEvent
 			spinner.Spawn();
 			plate.AddEntity( spinner, true );
 		}
-
-		PropsCreated = true;
 		
 		if ( PlatesGame.CurrentState is EventState state )
 		{
-			state.EndEventEarly = true;
+			state.EndEvent();
 		}
 	}
 }

@@ -12,7 +12,6 @@ public sealed class PlayerSwapEvent : BaseEvent
 	public override int MinAffected { get; set; } = 2;
 
 	private RealTimeUntil EventDelay;
-	private bool EventOperationsComplete;
 	private List<PlayerPair> PlayerPairs { get; } = new();
 	private List<string> PlayerNames { get; } = new();
 
@@ -27,7 +26,6 @@ public sealed class PlayerSwapEvent : BaseEvent
 		
 		PlayerNames.Clear();
 		PlayerPairs.Clear();
-		EventOperationsComplete = false;
 		
 		EventDelay = Random.Shared.Float( 5f, 25f ); // Make it random so players don't just throw themselves off of their plates
 		var playerCount = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
@@ -38,12 +36,13 @@ public sealed class PlayerSwapEvent : BaseEvent
 			randomSwaps--;
 
 		MaxAffected = randomSwaps;
-		//Description = $"{MaxAffected} players will swap positions at some point";
 		AssignPlayers();
 	}
 
-	private void PerformSwaps()
+	public override void EventBegin()
 	{
+		base.EventBegin();
+		
 		foreach (var pair in PlayerPairs.Where(pair => pair.Player1?.LifeState is LifeState.Alive && pair.Player2?.LifeState is LifeState.Alive))
 		{
 			var p1Pos = pair.Player1.Position;
@@ -60,7 +59,7 @@ public sealed class PlayerSwapEvent : BaseEvent
 
 		if ( PlatesGame.CurrentState is EventState state )
 		{
-			state.EndEventEarly = true;
+			state.EndEvent();
 		}
 	}
 
@@ -85,34 +84,31 @@ public sealed class PlayerSwapEvent : BaseEvent
 				Player2 = players[i + 1]
 			};
 
-			players[i].WasImpacted = true;
-			players[i + 1].WasImpacted = true;
+			var player1 = pair.Player1;
+			var player2 = pair.Player2;
+
+			PlatesGame.EventDetails.AffectedEntities.Add( player1 );
+			PlatesGame.EventDetails.AffectedEntities.Add( player2 );
 			
 			PlayerPairs.Add( pair );
-			PlayerNames.Add( players[i]?.Client.Name );
-			PlayerNames.Add( players[i+1]?.Client.Name );
+			PlayerNames.Add( player1?.Client.Name );
+			PlayerNames.Add( player2?.Client.Name );
 		}
 
-		Description = $"{StringFormatter.FormatPlayerNames( PlayerNames )} will be swapped at some point!";
+		PlatesGame.EventDetails.EventDescription = $"{StringFormatter.FormatPlayerNames( PlayerNames )} will be swapped at some point!";
 	}
 
 	public override void OnTick()
 	{
 		base.OnTick();
 
-		if ( !EventDelay || EventOperationsComplete )
-		{
-			return;
-		}
-
-		EventOperationsComplete = true;
-		if (Game.IsServer)
-			PerformSwaps();
+		if ( EventDelay && !EventBegan )
+			EventBegin();
 	}
 }
 
 public class PlayerPair
 {
-	public PlatesPlayer Player1 { get; set; }
-	public PlatesPlayer Player2 { get; set; }
+	public PlatesPlayer Player1 { get; init; }
+	public PlatesPlayer Player2 { get; init; }
 }

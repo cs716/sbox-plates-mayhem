@@ -2,6 +2,7 @@
 using Sandbox.Diagnostics;
 using System;
 using System.Linq;
+using PlatesGame.UI;
 
 //
 // You don't need to put things in a namespace, but it doesn't hurt.
@@ -17,12 +18,6 @@ namespace PlatesGame;
 /// </summary>
 partial class PlatesGame : GameManager
 {
-	public enum DebugTextLocations
-	{
-		PlayerData = 0,
-		StateData = 5,
-		EventData = 10
-	}
 	private readonly EventManager Events = new();	
 	public static PlatesGame Instance => Current as PlatesGame;
 	public static EventManager EventManager => Instance.Events;
@@ -40,36 +35,46 @@ partial class PlatesGame : GameManager
 	
 	[Net] private GameState InternalGameState { get; set; }
 	[Net] private BaseEvent InternalGameEvent { get; set; }
+
+	[Net] private CurrentEventDetails InternalEventDetails { get; set; } = new();
+
 	public static GameState CurrentState => Instance?.InternalGameState;
 	public static BaseEvent CurrentEvent => Instance?.InternalGameEvent;
-	
-	public static UI.PlatesHud PlayerHud => Instance?._hud;
 
-	// Debug remove this 
-	private string _lastEvent = "None";
+	public static CurrentEventDetails EventDetails => Instance?.InternalEventDetails; 
+	
+	public static PlatesHud PlayerHud => Instance?._hud;
+
+	private int _eventId = -1; 
 	
 	[GameEvent.Tick]
-	public static void OnTick()
+	public void OnTick()
 	{
 		if ( CurrentState is EventState)
 		{
-			if ( Instance._lastEvent != CurrentEvent?.Seed )
+			if ( EventDetails != null && EventDetails.EventId != _eventId )
 			{
-				Log.Info($"{(Game.IsServer ? "SERVER" : "CLIENT")} Event changed to: {CurrentEvent?.Name} - It was previously {Instance._lastEvent}"  );
-				Instance._lastEvent = CurrentEvent?.Seed;
+				Log.Info($"{(Game.IsServer ? "SERVER" : "CLIENT")} Event changed to: {EventDetails?.EventName}"  );
 
 				if ( Game.IsClient )
-					PlayerHud.SetLargeNotification( CurrentEvent?.Name, CurrentEvent?.Description, 5f );
+					PlayerHud.AddChild( new LargeNotification(7f) );
 
+				_eventId = EventDetails!.EventId;
 			}
 		}
 		CurrentState?.OnTick();
 	}
 
 	[ConCmd.Client]
+	public static void TestSplat()
+	{
+		_ = new HitSplat(Game.LocalPawn, HitSplat.DmgType.Regular, 10);
+	}
+
+	[ConCmd.Client]
 	public static void TestNotification()
 	{
-		PlayerHud.SetLargeNotification( "Test Notification Large", "Test Subtext Large", 10f );
+		PlayerHud.AddChild( new LargeNotification( "Test Notification", "Test Subtitle", 7f ) );
 	}
 
 	public static void ChangeState( GameState newState )
@@ -111,53 +116,5 @@ partial class PlatesGame : GameManager
 		base.ClientDisconnect( cl, reason );
 
 		CurrentState?.OnPlayerDisconnect( cl, reason );
-	}
-
-	[ConCmd.Admin]
-	public static void CreateBoard()
-	{
-		PlateManager.CreateBoard();
-	}
-
-	[ConCmd.Admin]
-	public static void RespawnAll()
-	{
-		foreach (var platesPlayer in All.OfType<PlatesPlayer>())
-		{
-			platesPlayer.Respawn();
-		}
-	}
-	
-	/// <summary>
-	/// Assigns a plate to each player and destroys the excess
-	/// </summary>
-	[ConCmd.Admin]
-	public static void AssignPlates()
-	{
-		var playerCount = Game.Clients.Count;
-		var curPlayer = 0;
-
-		foreach(var plate in All.OfType<PlateEntity>().OrderBy(_ => Random.Shared.Double( 0, 100 )))
-		{
-			if(curPlayer >= playerCount)
-			{
-				plate.Delete();
-			}
-			else
-			{
-				var client = Game.Clients.ElementAt( curPlayer );
-				plate.PlateOwner = client;
-				plate.OwnerName = client.Name;
-				if(client.Pawn is PlatesPlayer ply)
-				{
-					ply.Respawn();
-					ply.OwnedPlate = plate;
-					ply.Position = plate.Position + Vector3.Up * 100.0f;
-					ply.BaseVelocity = Vector3.Zero;
-					ply.Velocity = Vector3.Zero;
-				}
-			}
-			curPlayer++;
-		}
 	}
 }

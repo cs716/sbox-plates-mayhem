@@ -1,12 +1,14 @@
 ﻿using System.Linq;
+using System.Net.Mail;
 using Sandbox;
 
 namespace PlatesGame;
 
 public partial class EventState : GameState
 {
-	[Net] public bool EndEventEarly { get; set; }
-	public override float NextStateTime => 30f;
+	[Net] public RealTimeUntil EventDuration { get; set; }
+
+	private bool _durationBasedEvent = false; 
 
 	public EventState()
 	{
@@ -17,10 +19,25 @@ public partial class EventState : GameState
 		PlatesGame.ChangeEvent(newEvent);
 	}
 
+	public void EndEvent()
+	{
+		_durationBasedEvent = true;
+		EventDuration = 0f;
+	}
+
 	public override void OnEnter()
 	{
 		base.OnEnter();
 		PlatesGame.CurrentEvent?.OnEnter();
+		
+		if ( Game.IsClient )
+			return;
+
+		if ( PlatesGame.CurrentEvent?.EventDuration >= 0f )
+		{
+			EventDuration = PlatesGame.CurrentEvent.EventDuration;
+			_durationBasedEvent = true;
+		}
 	}
 
 	public override void OnExit()
@@ -34,15 +51,14 @@ public partial class EventState : GameState
 		base.OnTick();
 		PlatesGame.CurrentEvent?.OnTick();
 
-		if ( NextStateRealTime || EndEventEarly)
-		{
-			PlatesGame.CurrentEvent?.OnExit();
-			PlatesGame.ChangeState( new CooldownState
-			{
-				NextStateTime = 5f,
-				NextState = new EventState()
-			});
-		}
+		if ( Game.IsClient )
+			return;
+
+		if ( !_durationBasedEvent || !EventDuration )
+			return;
+		
+		PlatesGame.CurrentEvent?.OnExit();
+		PlatesGame.ChangeState( new CooldownState(CooldownState.CooldownFinishActions.ChangeToRandomEvent) { CooldownDuration = 5f });
 	}
 	
 	public override void OnPlayerDisconnect( IClient client, NetworkDisconnectionReason reason )

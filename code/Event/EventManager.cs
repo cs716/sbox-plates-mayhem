@@ -42,11 +42,6 @@ public class EventManager
 		Events.Add(newEvent);
 	}
 
-	public SafeEvent GetSafeEvent()
-	{
-		return Events.OfType<SafeEvent>().First();
-	}
-
 	public BaseEvent GetRandomEvent()
 	{
 		var totalWeight = Events.Sum( baseEvent => baseEvent.EventWeight );
@@ -62,5 +57,19 @@ public class EventManager
 		}
 
 		return null;
+	}
+}
+
+public partial class CurrentEventDetails : BaseNetworkable
+{
+	public float LastUpdate;
+	[Net, Change(nameof(PropertyChanged))] public string EventName { get; set; } = "None";
+	[Net, Change(nameof(PropertyChanged))] public string EventDescription { get; set; } = "None";
+	[Net, Change(nameof(PropertyChanged))] public IList<Entity> AffectedEntities { get; set; }
+	[Net, Change(nameof(PropertyChanged))] public int EventId { get; set; }
+
+	public void PropertyChanged()
+	{
+		LastUpdate = RealTime.Now;
 	}
 }
