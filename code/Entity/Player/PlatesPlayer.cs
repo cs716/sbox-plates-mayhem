@@ -100,7 +100,7 @@ public partial class PlatesPlayer : AnimatedEntity
 	{
 		if ( Game.IsServer )
 		{
-			if ( Position.z <= -2000f && LifeState is LifeState.Alive)
+			if ( Position.z is <= -2000f or >= 5000f && LifeState is LifeState.Alive)
 			{
 				if ( PlatesGame.CurrentState is WaitingState )
 				{
@@ -128,9 +128,7 @@ public partial class PlatesPlayer : AnimatedEntity
 	public override void OnKilled()
 	{
 		LifeState = LifeState.Dead;
-		var killPlate = PlatesGame.CurrentState?.OnPlayerDeath(this);
-		if ( killPlate is not null && killPlate == false )
-			return;
+		PlatesGame.CurrentState?.OnPlayerDeath(this);
 		
 		OwnedPlate?.Kill();
 		Components.GetOrCreate<SpectatorCamera>();

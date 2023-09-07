@@ -4,6 +4,12 @@
   flex-direction: column;
   color: #FFF;
   
+  .panel-inner {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  
   label {
     font-size: 70px;
     font-family: RussoOne;

@@ -1,0 +1,45 @@
+﻿@namespace PlatesGame.UI
+
+@using Sandbox
+@using Sandbox.UI
+
+@inherits global::PlatesGame.UI.BaseEntityWorldPanel 
+@attribute [StyleSheet]
+
+<root>
+	<div class="@damageType">
+		<label>@damageAmount</label>
+	</div>
+</root>
+
+@code {
+
+	private readonly RealTimeUntil TimeToLive;
+	private readonly DmgType damageType;
+	private readonly int damageAmount; 
+
+	public enum DmgType
+	{
+		Regular,
+		Poison
+	}
+
+	public HitSplat( Entity entity, DmgType type, int amount ) : base( entity, Vector3.Up * 15f )
+	{
+		// Get the center of the entity
+		
+		PanelBounds = new Rect( -100, -600, 250, 250 );
+		TimeToLive = 5f;
+		damageType = type;
+		damageAmount = amount;
+	}
+
+	public override void Tick()
+	{
+		base.Tick();
+		
+		if ( TimeToLive )
+			Delete();
+	}
+
+}

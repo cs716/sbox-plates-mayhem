@@ -1,13 +1,11 @@
 ﻿@namespace PlatesGame.UI
 @using System
-@using Sandbox
 @using Sandbox.UI
 @inherits Sandbox.UI.RootPanel 
 
 @attribute [StyleSheet]
 
 <root>
-	<div style="opacity: 0" class="LargeNotification" @ref="LargeNotification"></div>
 	@if ( PlatesGame.CurrentState is WaitingState )
 	{
 		<WaitingMenu />
@@ -16,46 +14,9 @@
 
 @code {
 
-	private Panel LargeNotification { get; set; }
-
-	private bool DisplayLargeNotification { get; set; }
-	private RealTimeUntil LargeNotificationTime { get; set; }
-
 	protected override int BuildHash()
 	{
-		return HashCode.Combine( 
-			PlatesGame.CurrentState.ClassName,
-			LargeNotification.Style.Opacity.ToString()
-			);
-	}
-
-	public void SetLargeNotification( string header, string subtext, float time )
-	{
-		DisplayLargeNotification = true;
-		LargeNotificationTime = time;
-		LargeNotification.DeleteChildren(  );
-		LargeNotification.Style.Opacity = 0f;
-		LargeNotification.AddChild<Label>( "header" ).SetText( header );
-		if (!string.IsNullOrEmpty( subtext ))
-			LargeNotification.AddChild<Label>( "subtext" ).SetText( subtext );
-		PlaySound("sounds/menu/notification.show.mp3");
-	}
-
-	public override void Tick()
-	{
-		base.Tick();
-
-		var opacity = LargeNotification.Style.Opacity;
-		
-		LargeNotification.Style.Opacity = DisplayLargeNotification switch
-		{
-			true when opacity < 1f => Math.Clamp( (float)(opacity + 0.02f), 0f, 1f ),
-			false when opacity > 0f => Math.Clamp( (float)(opacity - 0.02f), 0f, 1f ),
-			_ => opacity
-			};
-
-		if ( DisplayLargeNotification && LargeNotificationTime )
-			DisplayLargeNotification = false;
+		return HashCode.Combine( PlatesGame.CurrentState?.ClassName );
 	}
 
 }

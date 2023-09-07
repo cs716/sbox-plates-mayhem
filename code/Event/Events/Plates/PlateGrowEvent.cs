@@ -10,12 +10,10 @@ public class PlateGrowEvent : BaseEvent
 	public override int MinAffected => 1;
 	public override int MaxAffected => 10;
 	
-	private RealTimeUntil TimeUntilScale;
-	private bool ScaleCompleted;
 	private const float MinGrow = .1f;
+	
 	private const float MaxGrow = .4f;
-	private ICollection<PlateEntity> ImpactedPlates { get; set; } = new List<PlateEntity>();
-
+	public override float EventBeginDelay => 10f;
 	public override string Name => "Grow Plate";
 
 	public override void OnEnter()
@@ -25,41 +23,31 @@ public class PlateGrowEvent : BaseEvent
 		if ( Game.IsClient )
 			return;
 
-		ImpactedPlates.Clear();
-
 		var livingPlates = PlateManager.Plates().Where( p => !p.IsDead ).OrderBy( x => Random.Shared.Double( 1, 100 ) ).ToList();
 		var numPlatesImpacted = Random.Shared.Int( MinAffected, Math.Clamp( livingPlates.Count, MinAffected, MaxAffected ) );
 		List<string> playerNames = new();
 		for ( var i = 0; i < numPlatesImpacted; i++ )
 		{
-			ImpactedPlates.Add(livingPlates[i]);
-			livingPlates[i].WasImpacted = true;
+			PlatesGame.EventDetails.AffectedEntities.Add( livingPlates[i] );
 			playerNames.Add( livingPlates[i].OwnerName );
 		}
 
-		Description = $"The plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )} will randomly grow in 5 seconds!";
-		
-		TimeUntilScale = 5;
-		ScaleCompleted = false; 
+		PlatesGame.EventDetails.EventDescription = $"The plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )} will randomly grow in 5 seconds!";
 	}
 
-	public override void OnTick()
+	public override void EventBegin()
 	{
-		if ( !TimeUntilScale || ScaleCompleted )
-		{
-			return;
-		}
+		base.EventBegin();
 		
-		foreach (var plate in ImpactedPlates)
+		foreach (var plate in PlatesGame.EventDetails.AffectedEntities.OfType<PlateEntity>().Where(p => !p.IsDead  ))
 		{
 			var randomScale = Random.Shared.Float( MinGrow, MaxGrow );
 			plate.Grow( randomScale );
 		}
-
-		ScaleCompleted = true;
+		
 		if ( PlatesGame.CurrentState is EventState state )
 		{
-			state.EndEventEarly = true;
+			state.EndEvent();
 		}
 	}
 }

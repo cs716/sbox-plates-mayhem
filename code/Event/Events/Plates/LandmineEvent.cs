@@ -8,15 +8,13 @@ namespace PlatesGame;
 public class LandmineEvent : BaseEvent
 {
 	public override double EventWeight => 1d;
-	private RealTimeSince TimeSinceEnter;
-	private bool MinesSpawned;
 
 	public override string Name => "Landmines";
 	
 	public override int MinAffected => 1;
 	public override int MaxAffected => 12;
 
-	private ICollection<PlateEntity> ImpactedPlates { get; set; } = new List<PlateEntity>();
+	public override float EventBeginDelay => 10f;
 
 	public override void OnEnter()
 	{
@@ -24,10 +22,6 @@ public class LandmineEvent : BaseEvent
 
 		if ( Game.IsClient )
 			return;
-
-		ImpactedPlates.Clear();
-		TimeSinceEnter = 0;
-		MinesSpawned = false;
 		
 		var livingPlates = PlateManager.Plates().Where( p => !p.IsDead ).OrderBy( x => Random.Shared.Double( 1, 100 ) ).ToList();
 		
@@ -36,17 +30,21 @@ public class LandmineEvent : BaseEvent
 		
 		for ( var i = 0; i < numPlatesImpacted; i++ )
 		{
-			ImpactedPlates.Add(livingPlates[i]);
-			livingPlates[i].WasImpacted = true;
+			PlatesGame.EventDetails.AffectedEntities.Add( livingPlates[i] );
 			playerNames.Add( livingPlates[i].OwnerName );
 		}
 		
-		Description = $"Landmines will spawn on the plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )}! Avoid setting them off!";
+		PlatesGame.EventDetails.EventDescription = $"Landmines will spawn on the plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )}! Avoid setting them off!";
 	}
 
-	private void AssignPlates()
+	public override void EventBegin()
 	{
-		foreach (var plate in ImpactedPlates)
+		base.EventBegin();
+
+		if ( Game.IsClient )
+			return;
+		
+		foreach (var plate in PlatesGame.EventDetails.AffectedEntities.OfType<PlateEntity>().Where(p => !p.IsDead  ))
 		{
 			var plateScale = plate.GetSize();
 			var mine = new LandmineEntity
@@ -61,22 +59,7 @@ public class LandmineEvent : BaseEvent
 		}
 		if ( PlatesGame.CurrentState is EventState state )
 		{
-			state.EndEventEarly = true;
+			state.EndEvent();
 		}
-	}
-
-	public override void OnTick()
-	{
-		base.OnTick();
-
-		if ( !Game.IsServer )
-			return;
-
-		if ( TimeSinceEnter <= 5f || MinesSpawned )
-			return;
-
-		AssignPlates();
-		MinesSpawned = true; 
-
 	}
 }

@@ -17,6 +17,13 @@ PlayerTag {
   flex-direction: column;
   color: #FFF;
   
+  .panel-inner {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #FFF;
+  }
+  
   .name {
     text-overflow: ellipsis;
     white-space: nowrap;

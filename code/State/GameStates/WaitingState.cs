@@ -5,10 +5,11 @@ namespace PlatesGame;
 
 public partial class WaitingState : GameState
 {
-	public override bool AllowPlayerJoins => true;
 	[Net] public bool IsReady { get; set; }
 	
 	[Net] public int ReadyPlayers { get; set; }
+
+	[Net] public RealTimeUntil StartRoundTime { get; set; }
 
 	public override void OnEnter()
 	{
@@ -54,7 +55,7 @@ public partial class WaitingState : GameState
 				return;
 			}
 
-			if ( NextStateRealTime )
+			if ( StartRoundTime )
 			{
 				StartRound();
 			}
@@ -64,7 +65,7 @@ public partial class WaitingState : GameState
 			if ( CheckForMinPlayers() )
 			{
 				IsReady = true;
-				NextStateRealTime = GameConfig.TimeBetweenRounds;
+				StartRoundTime = GameConfig.TimeBetweenRounds;
 			}
 		}
 	}
@@ -77,6 +78,17 @@ public partial class WaitingState : GameState
 		}
 
 		return false;
+	}
+
+	public override void OnPlayerConnect( IClient client )
+	{
+		base.OnPlayerConnect( client );
+
+		if ( Game.IsClient )
+			return;
+		
+		PlateManager.FindAndAssignPlate( client );
+		ReadyPlayers = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
 	}
 
 	public override void OnPlayerDisconnect( IClient client, NetworkDisconnectionReason reason )
@@ -98,10 +110,9 @@ public partial class WaitingState : GameState
 			PlateManager.ReturnPlayerToPlate( platesPlayer );
 		}
 
-		PlatesGame.ChangeState( new CooldownState
+		PlatesGame.ChangeState( new CooldownState(CooldownState.CooldownFinishActions.ChangeToRandomEvent)
 		{
-			NextStateTime = 5f,
-			NextState = new EventState()
+			CooldownDuration = 5f
 		});
 	}
 }

@@ -17,10 +17,12 @@
 		return; 
 	}
 	
-	@if ( Plate.WasImpacted )
+	@if ( PlatesGame.EventDetails.AffectedEntities.Contains( Plate ) )
 	{
 		<label @ref="ImpactedLabel" style="color: yellow;" class="ImpactedLabel">warning</label>
 	}
+	
+	<div class="panel-inner" @ref="PlateDetails">
 	
 	@if ( Plate.PlateOwner != Game.LocalClient )
 	{
@@ -30,22 +32,26 @@
 	{
 		<label class="local name">Your Plate</label>
 	}
+	
+	</div>
 </root>
 
 @code {
 
 	private PlateEntity Plate => Entity as PlateEntity;
-	
+
+	private Panel PlateDetails { get; set; }
+
 	private Label ImpactedLabel { get; set; }
 
-	public PlateTag( PlateEntity plate ) : base( plate, Vector3.Up * 15f )
+	public PlateTag( Entity plate ) : base( plate, Vector3.Up * 15f )
 	{
 		PanelBounds = new Rect( -1000, -1000, 2000, 2000 );
 	}
 	
 	protected override int BuildHash()
 	{
-		return HashCode.Combine(Plate?.WasImpacted, Plate?.PlateOwner?.Name, Plate?.LifeState.ToString(), Style.Display.ToString());
+		return HashCode.Combine(PlatesGame.EventDetails.LastUpdate, Plate?.PlateOwner?.Name, Plate?.LifeState.ToString(), Style.Display.ToString());
 	}
 
 	public override void Tick()
@@ -55,15 +61,15 @@
 		if ( Plate.PlateOwner is null || !Plate.PlateOwner.IsValid() || !this.IsValid())
 			return;
 		
-		if ( Position.Distance( Camera.Position ) >= 1000f )
+		if ( Position.Distance( Camera.Position ) >= 1500f )
 		{
-			Style.Display = DisplayMode.None;
+			PlateDetails.Style.Display = DisplayMode.None;
 			return;
 		}
 		
-		if (Style.Display != DisplayMode.Flex)
+		if (PlateDetails.Style.Display != DisplayMode.Flex)
 		{
-			Style.Display = DisplayMode.Flex;
+			PlateDetails.Style.Display = DisplayMode.Flex;
 		}
 	}
 

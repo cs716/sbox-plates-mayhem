@@ -1,21 +1,47 @@
-﻿using Sandbox;
+﻿using System;
+using Sandbox;
 
 namespace PlatesGame;
 
-public partial class RoundEndState : CooldownState
+public partial class RoundEndState : GameState
 {
-	[Net] public string WinnerName { get; set; }
-	[Net] public int WinnerNetId { get; set; }
+	[Net] public PlatesPlayer RoundWinner { get; set; }
+	[Net] public RoundEndReason Outcome { get; set; }
 
-	public override float NextStateTime { get; set; }
+	private RealTimeUntil _nextRoundTimer = 10f;
+
+	public enum RoundEndReason
+	{
+		OnePlayerAlive,
+		EverybodyLeft,
+		EverybodyDied,
+		Unknown
+	}
+
+	public RoundEndState() : this( RoundEndReason.Unknown ) { }
+
+	public RoundEndState( RoundEndReason reason, PlatesPlayer winner = null )
+	{
+		Outcome = reason; 
+		
+		if (winner != null)
+			RoundWinner = winner; 
+	}
 
 	public override void OnEnter()
 	{
-		NextStateTime = GameConfig.WinnerScreenTime;
-		
 		base.OnEnter();
-		
-		Log.Info($"Winner: {WinnerName} ({WinnerNetId})!"  );
-		NextState = new WaitingState();
+		Log.Info($"Winner: {RoundWinner?.Client?.Name}!"  );
+	}
+
+	public override void OnTick()
+	{
+		base.OnTick();
+
+		if ( Game.IsClient )
+			return;
+
+		if ( _nextRoundTimer )
+			PlatesGame.ChangeState( new WaitingState() );
 	}
 }

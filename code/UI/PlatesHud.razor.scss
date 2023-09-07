@@ -3,40 +3,18 @@
 }
 
 .center-screen {
-  width: 100%; margin-left:auto; margin-right:auto;
+  width: 100%; 
+  margin-left:auto; 
+  margin-right:auto;
   justify-content:center;
   align-items: center;
 }
 
 .title {
-  font-size: 72px;
-  font-family: RussoOne;
+  font-size: 48px;
   font-weight: bold;
 }
 
-.LargeNotification {
-  font-family: RussoOne;
-  font-weight: bold;
-  color:#fff;
-  padding-top: 5px;
-  padding-bottom: 5px;
-  
-  .header {
-    font-size: 64px;
-  }
-  
-  .subtext {
-    font-size: 32px;
-  }
-  
-  text-align: center;
-  position: absolute;
-  width: 110%;
-  left: -5%;
-  top: 10%;
-  background-color: rgba(0, 0, 183, 0.5);
-  border: 2px solid #FFF;
-  flex-direction: column;
-  text-shadow: 1px 1px 4px black;
-  backdrop-filter: blur(5px);
+.materialIcons {
+  font-family: MaterialIconsRound;
 }

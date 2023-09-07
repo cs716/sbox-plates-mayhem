@@ -12,17 +12,19 @@
 }
 
 <root>
-	@if ( player.WasImpacted)
+	@if ( PlatesGame.EventDetails.AffectedEntities.Contains( player ))
 	{
 		<label @ref="ImpactedLabel" style="color: yellow;" class="ImpactedLabel">expand_more</label>
 	}
-	@if ( !player.IsLocalPawn )
-	{
-		<label class="name">@Player.Client.Name</label>
-	}
-	
-	<div @ref="HealthBar" class="healthbar">
-		<div @ref="HealthInner" class="inner"></div>
+	<div class="panel-inner" @ref="UserDetails">
+		@if ( !player.IsLocalPawn )
+		{
+			<label class="name">@Player.Client.Name</label>
+		}
+		
+		<div @ref="HealthBar" class="healthbar">
+			<div @ref="HealthInner" class="inner"></div>
+		</div>
 	</div>
 
 </root>
@@ -31,6 +33,7 @@
 	
 	private Panel HealthInner { get; set; }
 	private Panel HealthBar { get; set; }
+	private Panel UserDetails { get; set; }
 
 	private PlatesPlayer Player => Entity as PlatesPlayer;
 
@@ -46,7 +49,7 @@
 	
 	protected override int BuildHash()
 	{
-		return HashCode.Combine(HealthBar.Style.Opacity, Player?.WasImpacted.ToString(), Player?.Name, Player?.Health, Player?.LifeState.ToString(), Style.Display.ToString());
+		return HashCode.Combine(HealthBar.Style.Opacity, PlatesGame.EventDetails.LastUpdate, Player?.Name, Player?.Health, Player?.LifeState.ToString(), Style.Display.ToString());
 	}
 
 	public override void Tick()
@@ -56,15 +59,15 @@
 		if ( Player.LifeState != LifeState.Alive )
 			return;
 
-		if ( Position.Distance( Camera.Position ) >= 1000f )
+		if ( Position.Distance( Camera.Position ) >= 1500f )
 		{
-			Style.Display = DisplayMode.None;
+			UserDetails.Style.Display = DisplayMode.None;
 			return;
 		}
 		
-		if (Style.Display != DisplayMode.Flex)
+		if (UserDetails.Style.Display != DisplayMode.Flex)
 		{
-			Style.Display = DisplayMode.Flex;
+			UserDetails.Style.Display = DisplayMode.Flex;
 		}
 		
 		HealthInner.Style.Width = Length.Percent( Player.Health );
