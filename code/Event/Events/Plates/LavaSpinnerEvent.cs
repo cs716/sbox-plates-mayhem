@@ -13,9 +13,9 @@ public partial class LavaSpinnerEvent : BaseEvent
 
 	public override float EventBeginDelay => 10f;
 
-	public override void OnEnter()
+	public override void OnInvoked()
 	{
-		base.OnEnter();
+		base.OnInvoked();
 		
 		if ( Game.IsClient )
 			return;
@@ -35,9 +35,9 @@ public partial class LavaSpinnerEvent : BaseEvent
 		PlatesGame.EventDetails.EventDescription = $"Lava spinners will spawn on the plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )}! Jump to avoid them!";
 	}
 
-	public override void EventBegin()
+	public override void OnStart()
 	{
-		base.EventBegin();
+		base.OnStart();
 
 		if ( Game.IsClient )
 			return;

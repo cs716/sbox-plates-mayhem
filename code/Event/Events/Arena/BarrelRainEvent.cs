@@ -13,9 +13,9 @@ public class BarrelRainEvent : BaseEvent
 
 	public override string Name => "Explosive Barrel Rain";
 
-	public override void OnEnter()
+	public override void OnInvoked()
 	{
-		base.OnEnter();
+		base.OnInvoked();
 		
 		PlatesGame.EventDetails.EventDescription = "Explosive barrels will fall from the heavens! Try to avoid them!";
 	}
@@ -33,9 +33,9 @@ public class BarrelRainEvent : BaseEvent
 		}
 	}
 
-	public override void OnTick()
+	public override void EventTick()
 	{
-		base.OnTick();
+		base.EventTick();
 
 		if ( Game.IsClient )
 			return;

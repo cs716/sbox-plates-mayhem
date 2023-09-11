@@ -13,9 +13,9 @@ public class ArenaHighGravityEvent : BaseEvent
 
 	public override float EventDuration => 20f;
 	public override float EventBeginDelay => 8f;
-	public override void EventBegin()
+	public override void OnStart()
 	{
-		base.EventBegin();
+		base.OnStart();
 		
 		if ( Game.IsClient )
 			return;

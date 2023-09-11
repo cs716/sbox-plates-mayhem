@@ -6,15 +6,26 @@ namespace PlatesGame;
 
 public abstract partial class BaseEvent : BaseNetworkable
 {
+	public enum EventStates
+	{
+		Waiting,
+		Delaying,
+		Starting,
+		Running,
+		Stopping
+	}
+
+	public EventStates EventState { get; set; }
+
 	// Event Information
 	public virtual string Name => "No Name";
 	public virtual string Description => "No Description";
 	public virtual EventManager.EventType EventType => EventManager.EventType.UnclassifiedEvent;
 	public virtual double EventWeight => 1d;
 	public virtual float EventDuration => -1f;
-
 	public virtual float EventBeginDelay => -1f;
-	private RealTimeUntil _eventBeginDelay = -1f;
+
+	private RealTimeUntil _eventBeginDelay;
 	public bool EventBegan = false; 
 	
 	// Affected players/plates/etc
@@ -23,7 +34,7 @@ public abstract partial class BaseEvent : BaseNetworkable
 
 	public bool HasExited { get; private set; }
 
-	public virtual void OnEnter()
+	public virtual void OnInvoked()
 	{
 		HasExited = false;
 		EventBegan = false; 
@@ -32,15 +43,26 @@ public abstract partial class BaseEvent : BaseNetworkable
 		PlatesGame.EventDetails.EventDescription = Description;
 		PlatesGame.EventDetails.AffectedEntities.Clear();
 
-		if ( EventBeginDelay > 0 )
+		if ( EventBeginDelay > 0f )
 		{
-			_eventBeginDelay = EventBeginDelay; 
+			Log.Info( "Delaying for: " + EventBeginDelay );
+			_eventBeginDelay = EventBeginDelay;
+			EventState = EventStates.Delaying;
+			return;
 		}
+		
+		EventState = EventStates.Starting;
+		OnPreEventStart();
 	}
 
-	public virtual void EventBegin()
+	public virtual void OnPreEventStart()
 	{
-		EventBegan = true; 
+		EventState = EventStates.Running;
+		OnStart();
+	}
+	
+	public virtual void OnStart()
+	{
 	}
 
 	public virtual void OnExit()
@@ -49,9 +71,22 @@ public abstract partial class BaseEvent : BaseNetworkable
 		HasExited = true;
 	}
 
-	public virtual void OnTick()
+	public void Tick()
 	{
-		if ( EventBeginDelay > 0 && _eventBeginDelay && !EventBegan )
-			EventBegin();
+		if ( EventState is EventStates.Delaying && _eventBeginDelay)
+		{
+			EventState = EventStates.Starting;
+			OnPreEventStart();
+		}
+
+		if ( EventState is EventStates.Running )
+		{
+			EventTick();
+		}
+	}
+
+	// Will only run if EventState is "Running" 
+	public virtual void EventTick()
+	{
 	}
 }

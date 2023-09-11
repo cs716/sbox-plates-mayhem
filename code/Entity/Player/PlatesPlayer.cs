@@ -73,7 +73,7 @@ public partial class PlatesPlayer : AnimatedEntity
 	}
 
 	[Net] public IList<PlayerModifier> PlayerModifiers { get; set; }
-
+	
 	public override void ClientSpawn()
 	{
 		base.ClientSpawn();
@@ -82,11 +82,19 @@ public partial class PlatesPlayer : AnimatedEntity
 	
 	public override void Spawn()
 	{
+		Transmit = TransmitType.Always;
 		SetModel( "models/citizen/citizen.vmdl" );
 		
-		EnableTouch = true;
+		Tags.Add( "player", "trigger" );
+		
 		EnableHideInFirstPerson = true;
 		EnableShadowInFirstPerson = true;
+		
+		EnableHitboxes = true;
+		EnableDrawing = true; 
+		EnableTouch = true;
+
+		SetupPhysicsFromAABB( PhysicsMotionType.Keyframed, Hull.Mins, Hull.Maxs );
 
 		if (Game.IsServer) 
 			PlayerModifiers = new List<PlayerModifier>();
@@ -99,8 +107,6 @@ public partial class PlatesPlayer : AnimatedEntity
 		Components.GetOrCreate<PawnCamera>();
 		SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
 		Health = 100f;
-		
-		Tags.Add("player");
 		LifeState = LifeState.Alive;
 	}
 
@@ -194,5 +200,17 @@ public partial class PlatesPlayer : AnimatedEntity
 			.Run();
 
 		return tr;
+	}
+
+	public override void Touch( Entity other )
+	{
+		Log.Info( "Test Touch" );
+		base.Touch( other );
+	}
+	
+	public override void StartTouch( Entity other )
+	{
+		Log.Info( "Test StartTouch" );
+		base.Touch( other );
 	}
 }

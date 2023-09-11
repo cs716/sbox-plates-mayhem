@@ -16,9 +16,9 @@ public class LandmineEvent : BaseEvent
 
 	public override float EventBeginDelay => 10f;
 
-	public override void OnEnter()
+	public override void OnInvoked()
 	{
-		base.OnEnter();
+		base.OnInvoked();
 
 		if ( Game.IsClient )
 			return;
@@ -37,9 +37,9 @@ public class LandmineEvent : BaseEvent
 		PlatesGame.EventDetails.EventDescription = $"Landmines will spawn on the plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )}! Avoid setting them off!";
 	}
 
-	public override void EventBegin()
+	public override void OnStart()
 	{
-		base.EventBegin();
+		base.OnStart();
 
 		if ( Game.IsClient )
 			return;
