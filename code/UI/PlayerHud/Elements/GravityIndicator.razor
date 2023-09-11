@@ -1,0 +1,54 @@
+﻿@namespace PlatesGame.UI
+@using System
+@using System.Linq
+@using Sandbox
+@using Sandbox.UI
+
+@inherits Sandbox.UI.Panel
+
+@attribute [StyleSheet]
+
+<root>
+	<label class="materialIconsOutlined gravityIndicator">accessibility_new</label>
+	<label class="materialIconsOutlined gravityArrows single" @ref="SingleIndicator">keyboard_arrow_down</label>
+	<label class="materialIconsOutlined gravityArrows double" @ref="DoubleIndicator">keyboard_arrow_down</label>
+	<label class="materialIconsOutlined gravityArrows triple" @ref="TripleIndicator">keyboard_arrow_down</label>
+</root>
+
+@code {
+
+	private float _currentGravity;
+	private Label SingleIndicator { get; set; }
+	private Label DoubleIndicator { get; set; }
+	private Label TripleIndicator { get; set; }
+	
+	private readonly float _defaultGravity = GameConfig.DefaultGravity; 
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( PlatesGame.Instance.ArenaGravity, SingleIndicator.Style, DoubleIndicator.Style, TripleIndicator.Style );
+	}
+
+	public override void Tick()
+	{
+		if ( !PlatesGame.Instance.ArenaGravity.AlmostEqual( _currentGravity ))
+		{
+			var newGravity = PlatesGame.Instance.ArenaGravity;
+			var changePcent = newGravity / _defaultGravity;
+
+			SingleIndicator.Style.Display = newGravity.AlmostEqual( _defaultGravity ) ? DisplayMode.None : DisplayMode.Flex;
+			DoubleIndicator.Style.Display = changePcent >= 1.5 || changePcent <= 0.65 ? DisplayMode.Flex : DisplayMode.None;
+			TripleIndicator.Style.Display = changePcent >= 2.0 || changePcent <= 0.25 ? DisplayMode.Flex : DisplayMode.None;
+
+			var doInvert = newGravity > _defaultGravity;
+			foreach (var label in Children.OfType<Label>().Where(l => l.HasClass("gravityArrows"  )  ))
+			{
+				label.SetClass( "invert", doInvert );
+			}
+			
+			_currentGravity = newGravity; 
+		}
+		base.Tick();
+	}
+
+}

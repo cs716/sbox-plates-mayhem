@@ -24,18 +24,20 @@ public class EventManager
 		AddEvent( new SafeEvent() );
 		
 		// Arena
-		AddEvent( new ArenaHighGravityEvent() );
-		AddEvent( new ArenaLowGravityEvent() );
-		AddEvent( new BarrelRainEvent() );
-		
+		//AddEvent( new ArenaHighGravityEvent() );
+		//AddEvent( new ArenaLowGravityEvent() );
+		//AddEvent( new BarrelRainEvent() );
+		AddEvent( new GlassPlates() );
+		AddEvent( new PoisonPlates() );
+
 		// Plate
-		AddEvent( new LavaSpinnerEvent() );
-		AddEvent( new LandmineEvent() );
-		AddEvent( new PlateGrowEvent() );
-		AddEvent( new PlateShrinkEvent() );
-		
+		//AddEvent( new LavaSpinnerEvent() );
+		//AddEvent( new LandmineEvent() );
+		//AddEvent( new PlateGrowEvent() );
+		//AddEvent( new PlateShrinkEvent() );
+
 		// Player
-		AddEvent( new PlayerSwapEvent() );
+		//AddEvent( new PlayerSwapEvent() );
 	}
 
 	private void AddEvent(BaseEvent newEvent) {

@@ -20,10 +20,8 @@ public class ArenaHighGravityEvent : BaseEvent
 		if ( Game.IsClient )
 			return;
 		
-		foreach (var player in Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive  ))
-		{
-			player.Controller.Gravity += Random.Shared.Int( 50, 150 );
-		}
+		PlatesGame.Instance.ArenaGravity += Random.Shared.Int( 100, 250 );
+		Log.Info("Gravity set to " + PlatesGame.Instance.ArenaGravity  );
 		
 		if ( PlatesGame.CurrentState is EventState state )
 		{

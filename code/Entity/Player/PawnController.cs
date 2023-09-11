@@ -10,7 +10,6 @@ public class PawnController : EntityComponent<PlatesPlayer>
 	public int StepSize => 24;
 	public int GroundAngle => 45;
 	public int JumpSpeed => 410;
-	public float Gravity { get; set; } = 800f;
 
 	HashSet<string> ControllerEvents = new( StringComparer.OrdinalIgnoreCase );
 
@@ -39,7 +38,7 @@ public class PawnController : EntityComponent<PlatesPlayer>
 		else
 		{
 			Entity.Velocity = Accelerate( Entity.Velocity, moveVector.Normal, moveVector.Length, 15, 20f );
-			Entity.Velocity += Vector3.Down * Gravity * Time.Delta;
+			Entity.Velocity += Vector3.Down * PlatesGame.Instance.ArenaGravity * Time.Delta;
 		}
 
 		if ( Input.Pressed( "jump" ) )

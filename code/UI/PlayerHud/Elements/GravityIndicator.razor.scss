@@ -1,0 +1,53 @@
+﻿GravityIndicator {
+  border: 1px solid #000e4f;
+  padding: 20px;
+  border-radius: 50%;
+  margin-left: 30px;
+
+  background-color: rgba(0, 33, 166, 0.5);
+  backdrop-filter: blur(5px);
+  label {
+    font-size:72px;
+  }
+  
+  label.gravityIndicator {
+    color: #33b1ff;
+  }
+  
+  label.gravityArrows {
+    left: 0;
+    padding: 20px;
+    position: absolute;
+    animation: bounce;
+    animation-duration: .8s;
+    animation-direction: alternate-reverse;
+    color: rgb(255, 255, 255);
+    
+    &.invert {
+      transform: rotate(180deg);
+      animation: bounceInvert;
+    }
+    
+    &.single {
+      bottom: -50px;
+    }
+
+    &.double {
+      bottom: -65px;
+    }
+
+    &.triple {
+      bottom: -80px;
+    }
+  }
+}
+
+@keyframes bounce {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-5px); }
+}
+
+@keyframes bounceInvert {
+  0%   { transform: rotate(180deg) translateY(0); }
+  100%  { transform: rotate(180deg) translateY(-5px); }
+}

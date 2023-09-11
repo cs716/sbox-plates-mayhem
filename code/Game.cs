@@ -22,14 +22,18 @@ partial class PlatesGame : GameManager
 	public static PlatesGame Instance => Current as PlatesGame;
 	public static EventManager EventManager => Instance.Events;
 
-	private UI.PlatesHud _hud;
+	private PlatesHud _hud;
 	
 	public PlatesGame()
 	{
 		ChangeState( new WaitingState() );
 		if ( Game.IsClient )
 		{
-			_hud = new UI.PlatesHud();
+			_hud = new PlatesHud();
+		}
+		else
+		{
+			ArenaGravity = GameConfig.DefaultGravity;
 		}
 	}
 	
@@ -44,6 +48,8 @@ partial class PlatesGame : GameManager
 	public static CurrentEventDetails EventDetails => Instance?.InternalEventDetails; 
 	
 	public static PlatesHud PlayerHud => Instance?._hud;
+
+	[Net] public float ArenaGravity { get; set; }
 
 	private int _eventId = -1; 
 	
@@ -94,8 +100,9 @@ partial class PlatesGame : GameManager
 
 		if ( CurrentEvent?.HasExited == false)
 			CurrentEvent?.OnExit();
+		
+		newEvent.OnEnter();
 		Instance.InternalGameEvent = newEvent;
-		CurrentEvent?.OnEnter();
 	}
 	
 	public override void ClientJoined( IClient client )

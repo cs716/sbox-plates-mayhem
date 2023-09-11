@@ -21,9 +21,9 @@
   width: 110%;
   left: -5%;
   top: 10%;
-  background-color: rgba(0, 0, 183, 0.5);
   border: 2px solid #FFF;
   text-shadow: 1px 1px 4px black;
+  background-color: rgba(0, 0, 183, 0.5);
   backdrop-filter: blur(5px);
   
   &:not(.fadeOut) {

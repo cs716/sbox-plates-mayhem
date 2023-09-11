@@ -14,7 +14,7 @@ public abstract partial class BaseEvent : BaseNetworkable
 	public virtual float EventDuration => -1f;
 
 	public virtual float EventBeginDelay => -1f;
-	private RealTimeUntil _eventBeginDelay;
+	private RealTimeUntil _eventBeginDelay = -1f;
 	public bool EventBegan = false; 
 	
 	// Affected players/plates/etc
@@ -25,6 +25,7 @@ public abstract partial class BaseEvent : BaseNetworkable
 
 	public virtual void OnEnter()
 	{
+		HasExited = false;
 		EventBegan = false; 
 		PlatesGame.EventDetails.EventId++;
 		PlatesGame.EventDetails.EventName = Name;

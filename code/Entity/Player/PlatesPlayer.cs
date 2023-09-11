@@ -1,4 +1,5 @@
-﻿using Sandbox;
+﻿using System.Collections.Generic;
+using Sandbox;
 using System.ComponentModel;
 
 namespace PlatesGame;
@@ -10,7 +11,6 @@ public partial class PlatesPlayer : AnimatedEntity
 	/// Plate variables 
 	/// </summary>
 	[Net] public PlateEntity OwnedPlate { get; set; }
-	[Net] public bool WasImpacted { get; set; } 
 
 	private bool IsThirdPerson { get; set; } = true;
 	
@@ -66,7 +66,14 @@ public partial class PlatesPlayer : AnimatedEntity
 	[BindComponent] public BasePlayerCamera Camera { get; }
 
 	public override Ray AimRay => new ( EyePosition, EyeRotation.Forward );
-	
+
+	public enum PlayerModifier
+	{
+		Poisoned
+	}
+
+	[Net] public IList<PlayerModifier> PlayerModifiers { get; set; }
+
 	public override void ClientSpawn()
 	{
 		base.ClientSpawn();
@@ -80,6 +87,9 @@ public partial class PlatesPlayer : AnimatedEntity
 		EnableTouch = true;
 		EnableHideInFirstPerson = true;
 		EnableShadowInFirstPerson = true;
+
+		if (Game.IsServer) 
+			PlayerModifiers = new List<PlayerModifier>();
 	}
 
 	public void Respawn()
@@ -92,7 +102,6 @@ public partial class PlatesPlayer : AnimatedEntity
 		
 		Tags.Add("player");
 		LifeState = LifeState.Alive;
-		Controller.Gravity = GameConfig.DefaultGravity;
 	}
 
 	[GameEvent.Tick]

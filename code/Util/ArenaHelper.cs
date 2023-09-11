@@ -3,7 +3,7 @@ using Sandbox;
 
 namespace PlatesGame;
 
-public class ArenaHelper
+public static class ArenaHelper
 {
 	public static void Explosion( Entity owner, Vector3 position, float radius, float damage, float forceScale, bool createEffects)
 	{

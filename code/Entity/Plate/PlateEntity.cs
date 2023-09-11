@@ -10,24 +10,27 @@ public sealed partial class PlateEntity : MeshEntity
 	[Net] public IClient PlateOwner {get;set;} = null;
     [Net] public string OwnerName {get;set;}
     [Net] public bool IsDead {get;set;}
-    
-    [Net] public bool WasImpacted { get; set; }
-
     [Net] public IList<Entity> PlateEnts {get; set;}
     [Net] private Vector3 TargetPosition {get;set;}
     [Net] private Rotation TargetRotation {get;set;}
     [Net] private RealTimeSince MovementTime {get;set;}
     [Net] private Vector3 MovementSpeed {get;set;}
-    [Net] public bool IsFragile {get;set;} = false;
 
-    private Glow Glow { get; set; }
-
-    //private PlateNameTag plateTag = null;
-    
-    public PlateEntity() { }
-    public PlateEntity(Vector3 pos, float size, string own)
+    public enum PlateModifier
     {
-        Tags.Add("plate");
+	    Fragile,
+	    Poison
+    }
+
+    [Net] public IList<PlateModifier> PlateModifiers { get; set; }
+
+    public PlateEntity()
+    {
+	    Tags.Add("plate", "solid");
+	    motionType = PhysicsMotionType.Keyframed;
+    }
+    public PlateEntity(Vector3 pos, float size, string own) : this()
+    {
         Position = pos;
         OwnerName = own;
         TargetPosition = Position;
@@ -36,15 +39,36 @@ public sealed partial class PlateEntity : MeshEntity
         var newScale = new Vector3(size, size, 0.01f);
         scale = newScale;
         ToScale = newScale;
-        
-        motionType = PhysicsMotionType.Keyframed;
+    }
 
-        Glow = Components.GetOrCreate<Glow>();
-        Glow.Enabled = false;
-        Glow.ObscuredColor = Color.Cyan;
-        Glow.InsideColor = Color.Cyan;
-        Glow.Color = Color.Blue;
-        
+    public void AddModifier( PlateModifier modifier )
+    {
+	    if ( !PlateModifiers.Contains( modifier ) )
+		    PlateModifiers.Add( modifier );
+
+	    PlateModifiersChanged();
+    }
+
+    public void RemoveModifier( PlateModifier modifier )
+    {
+	    if ( PlateModifiers.Contains( modifier ) )
+		    PlateModifiers.Remove( modifier );
+
+	    PlateModifiersChanged();
+    }
+
+    private void PlateModifiersChanged( )
+    {
+	    Log.Info($"{(Game.IsClient ? "CLIENT" : "SERVER")} PlateModifiersChanged - {OwnerName}");
+	    if ( PlateModifiers.Contains( PlateModifier.Poison ) )
+	    {
+		    SetColor( Color.Green );
+	    }
+
+	    if ( PlateModifiers.Contains( PlateModifier.Fragile ) )
+	    {
+		    SetAlpha( 0.5f );
+	    }
     }
 
     public override void ClientSpawn()
@@ -58,12 +82,13 @@ public sealed partial class PlateEntity : MeshEntity
 
         SetupPhysicsFromModel(motionType);
         EnableAllCollisions = true;
-        Tags.Add("solid");
         RenderColor = Color.White;
-        LifeState = LifeState.Alive;
+
+        if ( Game.IsServer )
+	        PlateModifiers = new List<PlateModifier>();
     }
 
-    private int FadeOutIncrement; 
+    private int _fadeOutIncrement; 
     public override void Tick(){
         base.Tick();
 
@@ -76,10 +101,6 @@ public sealed partial class PlateEntity : MeshEntity
 
         if ( IsDead && RenderColor != Color.Red )
 	        SetColor( Color.Red );
-        else if ( RenderColor == Color.White && WasImpacted )
-	        SetColor( Color.Yellow );
-        else if ( RenderColor == Color.Yellow && !WasImpacted )
-	        SetColor( Color.White );
 
         if ( !Game.IsServer )
         {
@@ -99,11 +120,11 @@ public sealed partial class PlateEntity : MeshEntity
 
         if(IsDead)
         {
-	        if(FadeOutIncrement % 2 == 0 && RenderColor.a > 0f)
+	        if(_fadeOutIncrement % 2 == 0 && RenderColor.a > 0f)
 	        {
 		        SetAlpha(RenderColor.a - 0.004f);
 	        }
-	        FadeOutIncrement++;
+	        _fadeOutIncrement++;
         }
     }
 
@@ -115,7 +136,6 @@ public sealed partial class PlateEntity : MeshEntity
 	    //Sound.FromEntity("plates_death", this);
 	    SetColor(Color.Red);
 	    DeleteAsync(7);
-	    WasImpacted = false;
 	    IsDead = true;
     }
 
@@ -143,12 +163,12 @@ public sealed partial class PlateEntity : MeshEntity
         PlateEnts.Add(ent);
     }
 
-    public void SetColor(Color color)
+    private void SetColor(Color color)
     {
         RenderColor = color;
     }
 
-    public void SetAlpha(float alpha)
+    private void SetAlpha(float alpha)
     {
         RenderColor = RenderColor.WithAlpha(alpha);
     }
@@ -218,10 +238,22 @@ public sealed partial class PlateEntity : MeshEntity
     {
         base.StartTouch(other);
 
-        if ( !IsFragile || (!(other.Velocity.Length > 80) && Random.Shared.Int( 99999 ) != 1) )
-	        return;
+        if ( Game.IsClient )
+	        return; 
 
-        Sound.FromWorld("plates_glass_break", Position);
-        Delete();
+        if ( PlateModifiers.Contains( PlateModifier.Fragile ) )
+        {
+	        if ( other.Velocity.Length > 80 )
+	        {
+		        Sound.FromWorld( "plates_glass_break", Position );
+		        Delete();
+		        return;
+	        }
+        }
+
+        if ( other is PlatesPlayer player && PlateModifiers.Contains( PlateModifier.Poison ) && !player.PlayerModifiers.Contains( PlatesPlayer.PlayerModifier.Poisoned  ))
+        {
+	        player.PlayerModifiers.Add( PlatesPlayer.PlayerModifier.Poisoned  );
+        }
     }
 }

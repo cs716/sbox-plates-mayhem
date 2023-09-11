@@ -27,7 +27,7 @@ public partial class RoundEndState : GameState
 		if (winner != null)
 			RoundWinner = winner; 
 	}
-
+	
 	public override void OnEnter()
 	{
 		base.OnEnter();

@@ -14,9 +14,12 @@ public partial class WaitingState : GameState
 	public override void OnEnter()
 	{
 		base.OnEnter();
-		
-		if (Game.IsServer)
+
+		if ( Game.IsServer )
+		{
 			PlateManager.ClearBoard();
+			PlatesGame.Instance.ArenaGravity = GameConfig.DefaultGravity;
+		}
 
 		PlateManager.CreateBoard();
 		
