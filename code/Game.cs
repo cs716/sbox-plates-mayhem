@@ -101,7 +101,7 @@ partial class PlatesGame : GameManager
 		if ( CurrentEvent?.HasExited == false)
 			CurrentEvent?.OnExit();
 		
-		newEvent.OnEnter();
+		newEvent.OnInvoked();
 		Instance.InternalGameEvent = newEvent;
 	}
 	

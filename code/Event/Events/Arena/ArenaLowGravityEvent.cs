@@ -13,9 +13,9 @@ public class ArenaLowGravityEvent : BaseEvent
 	public override string Description => "The gravity in the arena will be lowered for everyone!";
 	public override float EventBeginDelay => 8f;
 
-	public override void EventBegin()
+	public override void OnStart()
 	{
-		base.EventBegin();
+		base.OnStart();
 		
 		if ( Game.IsClient )
 			return;

@@ -16,9 +16,9 @@ public class PlateGrowEvent : BaseEvent
 	public override float EventBeginDelay => 10f;
 	public override string Name => "Grow Plate";
 
-	public override void OnEnter()
+	public override void OnInvoked()
 	{
-		base.OnEnter();
+		base.OnInvoked();
 
 		if ( Game.IsClient )
 			return;
@@ -35,9 +35,9 @@ public class PlateGrowEvent : BaseEvent
 		PlatesGame.EventDetails.EventDescription = $"The plate{(numPlatesImpacted != 1 ? "s" : "")} owned by {StringFormatter.FormatPlayerNames( playerNames )} will randomly grow in 5 seconds!";
 	}
 
-	public override void EventBegin()
+	public override void OnStart()
 	{
-		base.EventBegin();
+		base.OnStart();
 		
 		foreach (var plate in PlatesGame.EventDetails.AffectedEntities.OfType<PlateEntity>().Where(p => !p.IsDead  ))
 		{

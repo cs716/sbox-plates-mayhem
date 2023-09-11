@@ -26,7 +26,6 @@ public sealed partial class PlateEntity : MeshEntity
 
     public PlateEntity()
     {
-	    Tags.Add("plate", "solid");
 	    motionType = PhysicsMotionType.Keyframed;
     }
     public PlateEntity(Vector3 pos, float size, string own) : this()
@@ -83,6 +82,10 @@ public sealed partial class PlateEntity : MeshEntity
         SetupPhysicsFromModel(motionType);
         EnableAllCollisions = true;
         RenderColor = Color.White;
+        EnableTouch = true;
+        EnableTouchPersists = true;
+		
+        Tags.Add("plate", "solid", "trigger");
 
         if ( Game.IsServer )
 	        PlateModifiers = new List<PlateModifier>();
@@ -234,26 +237,38 @@ public sealed partial class PlateEntity : MeshEntity
         return ToScale.z;
     }
 
-    public override void StartTouch(Entity other)
+    public override void StartTouch( Entity other )
     {
-        base.StartTouch(other);
+	    base.StartTouch( other );
+	    Log.Info( "StartTouch" );
+    }
 
-        if ( Game.IsClient )
-	        return; 
+    public override void EndTouch( Entity other )
+    {
+	    base.EndTouch( other );
+	    Log.Info( "EndTouch" );
+    }
 
-        if ( PlateModifiers.Contains( PlateModifier.Fragile ) )
-        {
-	        if ( other.Velocity.Length > 80 )
-	        {
-		        Sound.FromWorld( "plates_glass_break", Position );
-		        Delete();
-		        return;
-	        }
-        }
+    public void PlayerLanded( PlatesPlayer player, Vector3 velocity )
+    {
+	    Log.Info("Touch Plate with landing velocity " + velocity.z  );
+	    
+	    if ( Game.IsClient )
+		    return; 
+	    
+	    if ( PlateModifiers.Contains( PlateModifier.Fragile ) )
+	    {
+		    if ( velocity.z < -390 ) // Default gravity landing speed
+		    {
+			    Sound.FromWorld( "plate_glass_break", Position );
+			    Delete();
+			    return;
+		    }
+	    }
 
-        if ( other is PlatesPlayer player && PlateModifiers.Contains( PlateModifier.Poison ) && !player.PlayerModifiers.Contains( PlatesPlayer.PlayerModifier.Poisoned  ))
-        {
-	        player.PlayerModifiers.Add( PlatesPlayer.PlayerModifier.Poisoned  );
-        }
+	    if ( PlateModifiers.Contains( PlateModifier.Poison ) && !player.PlayerModifiers.Contains( PlatesPlayer.PlayerModifier.Poisoned  ))
+	    {
+		    player.PlayerModifiers.Add( PlatesPlayer.PlayerModifier.Poisoned  );
+	    }
     }
 }

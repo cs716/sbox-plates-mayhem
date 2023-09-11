@@ -17,9 +17,9 @@ public sealed class PlayerSwapEvent : BaseEvent
 
 	public override string Name => "Player Swap";
 
-	public override void OnEnter()
+	public override void OnInvoked()
 	{
-		base.OnEnter();
+		base.OnInvoked();
 		
 		if ( Game.IsClient )
 			return;
@@ -39,9 +39,9 @@ public sealed class PlayerSwapEvent : BaseEvent
 		AssignPlayers();
 	}
 
-	public override void EventBegin()
+	public override void OnStart()
 	{
-		base.EventBegin();
+		base.OnStart();
 		
 		foreach (var pair in PlayerPairs.Where(pair => pair.Player1?.LifeState is LifeState.Alive && pair.Player2?.LifeState is LifeState.Alive))
 		{
@@ -98,12 +98,12 @@ public sealed class PlayerSwapEvent : BaseEvent
 		PlatesGame.EventDetails.EventDescription = $"{StringFormatter.FormatPlayerNames( PlayerNames )} will be swapped at some point!";
 	}
 
-	public override void OnTick()
+	public override void EventTick()
 	{
-		base.OnTick();
+		base.EventTick();
 
 		if ( EventDelay && !EventBegan )
-			EventBegin();
+			OnStart();
 	}
 }
 

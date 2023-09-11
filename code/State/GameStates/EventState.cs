@@ -28,7 +28,7 @@ public partial class EventState : GameState
 	public override void OnEnter()
 	{
 		base.OnEnter();
-		PlatesGame.CurrentEvent?.OnEnter();
+		PlatesGame.CurrentEvent?.OnInvoked();
 		
 		if ( Game.IsClient )
 			return;
@@ -49,7 +49,8 @@ public partial class EventState : GameState
 	public override void OnTick()
 	{
 		base.OnTick();
-		PlatesGame.CurrentEvent?.OnTick();
+		
+		PlatesGame.CurrentEvent?.Tick();
 
 		if ( Game.IsClient )
 			return;

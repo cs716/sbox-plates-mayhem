@@ -28,6 +28,10 @@ public class PawnController : EntityComponent<PlatesPlayer>
 		{
 			if ( !Grounded )
 			{
+				if ( groundEntity is PlateEntity plate )
+				{
+					plate.PlayerLanded( Entity, Entity.Velocity );
+				}
 				Entity.Velocity = Entity.Velocity.WithZ( 0 );
 				AddEvent( "grounded" );
 			}
