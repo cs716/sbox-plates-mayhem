@@ -24,6 +24,7 @@ public sealed class PlayerSwapEvent : BaseEvent
 		if ( Game.IsClient )
 			return;
 		
+		swapsPerformed = false; 
 		PlayerNames.Clear();
 		PlayerPairs.Clear();
 		
@@ -39,9 +40,9 @@ public sealed class PlayerSwapEvent : BaseEvent
 		AssignPlayers();
 	}
 
-	public override void OnStart()
+	private void PerformSwap()
 	{
-		base.OnStart();
+		swapsPerformed = true; 
 		
 		foreach (var pair in PlayerPairs.Where(pair => pair.Player1?.LifeState is LifeState.Alive && pair.Player2?.LifeState is LifeState.Alive))
 		{
@@ -98,12 +99,14 @@ public sealed class PlayerSwapEvent : BaseEvent
 		PlatesGame.EventDetails.EventDescription = $"{StringFormatter.FormatPlayerNames( PlayerNames )} will be swapped at some point!";
 	}
 
+	private bool swapsPerformed; 
+
 	public override void EventTick()
 	{
 		base.EventTick();
 
-		if ( EventDelay && !EventBegan )
-			OnStart();
+		if ( EventDelay && !swapsPerformed )
+			PerformSwap();
 	}
 }
 

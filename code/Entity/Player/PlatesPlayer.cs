@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Sandbox;
 using System.ComponentModel;
+using System.Linq;
 
 namespace PlatesGame;
 
@@ -73,6 +75,27 @@ public partial class PlatesPlayer : AnimatedEntity
 	}
 
 	[Net] public IList<PlayerModifier> PlayerModifiers { get; set; }
+
+	public void AddModifier( PlayerModifier modifier )
+	{
+		if ( !PlayerModifiers.Contains( modifier ) )
+			PlayerModifiers.Add( modifier );
+		
+		ModifiersUpdated();
+	}
+	
+	public void RemoveModifier( PlayerModifier modifier )
+	{
+		if ( PlayerModifiers.Contains( modifier ) )
+			PlayerModifiers.Remove( modifier );
+
+		ModifiersUpdated();
+	}
+
+	private void ModifiersUpdated()
+	{
+		PoisonTick = Random.Shared.Float( 10f, 30f ); 
+	}
 	
 	public override void ClientSpawn()
 	{
@@ -106,10 +129,12 @@ public partial class PlatesPlayer : AnimatedEntity
 		Components.Create<PawnAnimator>();
 		Components.GetOrCreate<PawnCamera>();
 		SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
+		PlayerModifiers.Clear();
 		Health = 100f;
 		LifeState = LifeState.Alive;
 	}
 
+	private RealTimeUntil PoisonTick;
 	[GameEvent.Tick]
 	private void Tick()
 	{
@@ -124,6 +149,23 @@ public partial class PlatesPlayer : AnimatedEntity
 				}
 				Log.Info($"{Client.Name} has died"  );
 				Kill();
+			}
+
+			if ( PlayerModifiers.Contains( PlayerModifier.Poisoned ) && PoisonTick )
+			{
+				PoisonTick = Random.Shared.Float( 5f, 30f ); 
+				// A-choo 
+				Sound.FromEntity( "player.sneeze", this );
+				
+				// Spread the rona 
+				foreach (var player in FindInSphere( Position, 100f  ).OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive ))
+				{
+					if (!player.PlayerModifiers.Contains(PlayerModifier.Poisoned  ))
+						player.AddModifier( PlayerModifier.Poisoned );
+				}
+				
+				// Damage 
+				TakeDamage (DamageInfo.Generic( 5f ));
 			}
 		}
 		else
@@ -200,17 +242,5 @@ public partial class PlatesPlayer : AnimatedEntity
 			.Run();
 
 		return tr;
-	}
-
-	public override void Touch( Entity other )
-	{
-		Log.Info( "Test Touch" );
-		base.Touch( other );
-	}
-	
-	public override void StartTouch( Entity other )
-	{
-		Log.Info( "Test StartTouch" );
-		base.Touch( other );
 	}
 }

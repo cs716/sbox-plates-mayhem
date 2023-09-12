@@ -17,6 +17,10 @@
     animation: spinner 1s linear infinite;
     margin-right: 25px;
   }
+  
+  .shadow {
+    text-shadow: 3px 3px 8px black;
+  }
 }
 
 @keyframes wobble {

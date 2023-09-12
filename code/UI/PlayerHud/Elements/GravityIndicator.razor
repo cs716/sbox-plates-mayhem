@@ -22,7 +22,7 @@
 	private Label DoubleIndicator { get; set; }
 	private Label TripleIndicator { get; set; }
 	
-	private readonly float _defaultGravity = GameConfig.DefaultGravity; 
+	private readonly float _defaultGravity = GameConfig.DefaultGravity * 2; 
 
 	protected override int BuildHash()
 	{
@@ -40,7 +40,7 @@
 			DoubleIndicator.Style.Display = changePcent >= 1.5 || changePcent <= 0.65 ? DisplayMode.Flex : DisplayMode.None;
 			TripleIndicator.Style.Display = changePcent >= 2.0 || changePcent <= 0.25 ? DisplayMode.Flex : DisplayMode.None;
 
-			var doInvert = newGravity > _defaultGravity;
+			var doInvert = newGravity < _defaultGravity;
 			foreach (var label in Children.OfType<Label>().Where(l => l.HasClass("gravityArrows"  )  ))
 			{
 				label.SetClass( "invert", doInvert );

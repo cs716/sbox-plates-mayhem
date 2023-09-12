@@ -9,12 +9,12 @@
 	@if ( GetConnectedPlayers() < GameConfig.MinimumPlayers )
 	{
 		<label style="font-size: 48px;" class="title white hourglass"></label>
-		<label class="title white mainText">Waiting for @(GameConfig.MinimumPlayers - GetConnectedPlayers()) more player@(GameConfig.MinimumPlayers - GetConnectedPlayers() > 1 ? "s" : "") to begin ..</label>
+		<label class="title white mainText shadow">Waiting for @(GameConfig.MinimumPlayers - GetConnectedPlayers()) more player@(GameConfig.MinimumPlayers - GetConnectedPlayers() > 1 ? "s" : "") to begin ..</label>
 	}
 	else
 	{
 		<label class="title white mainText" style="font-size: 100px;margin-right: 10px;">@GetCountdown()</label>
-		<label class="title white">Get ready! The round is about to begin</label>
+		<label class="title white shadow">Get ready! The round is about to begin</label>
 	}
 </root>
 

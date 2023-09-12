@@ -7,6 +7,25 @@
 
 @attribute [StyleSheet]
 
+@if ( Game.LocalPawn is not PlatesPlayer player || !player.IsValid() )
+{
+	return;
+}
+
 <root>
-	<GravityIndicator />
+	@if (!PlatesGame.Instance.ArenaGravity.AlmostEqual( GameConfig.DefaultGravity )) {
+		<GravityIndicator />
+	}
+	@if (player.PlayerModifiers.Contains( PlatesPlayer.PlayerModifier.Poisoned )) {
+		<PoisonIndicator />
+	}
 </root>
+
+@code {
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( PlatesGame.Instance.ArenaGravity, ((PlatesPlayer)Game.LocalPawn).PlayerModifiers.Count );
+	}
+
+}
