@@ -1,4 +1,5 @@
-Plates of Mayhem
+![Logo](https://media.discordapp.net/attachments/1150997539382890498/1151002038864453712/DiscordLogo3.jpg)
+# Plates of Mayhem
 A round-based survival game heavily based on Plates of Fate: Mayhem (Roblox - Created by DylanBuildar) / Plates of Fate: Remastered (Roblox - Created by Zephy and Supermushroom8).
 
 The goal of Plates of Mayhem is to be the last player standing by surviving anything and everything the game (and other players) throws at you.
