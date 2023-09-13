@@ -59,7 +59,7 @@ public partial class EventState : GameState
 			return;
 		
 		PlatesGame.CurrentEvent?.OnExit();
-		PlatesGame.ChangeState( new CooldownState(CooldownState.CooldownFinishActions.ChangeToRandomEvent) { CooldownDuration = 5f });
+		PlatesGame.ChangeState( new CooldownState(CooldownState.CooldownFinishActions.ChangeToRandomEvent) { CooldownDuration = GameConfig.TimeBetweenRounds });
 	}
 	
 	public override void OnPlayerDisconnect( IClient client, NetworkDisconnectionReason reason )
