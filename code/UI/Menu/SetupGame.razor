@@ -1,0 +1,68 @@
+@using Sandbox;
+@using System;
+@using System.Linq;
+@using System.Threading.Tasks;
+@using PlatesGame
+@using Sandbox.Menu;
+@using Sandbox.UI;
+
+<root>
+    <label class="game-title">
+        @Game.Menu.Package.Title
+    </label>
+
+    <div class="controls">
+        <div class="span">
+            @if ( MaxPlayersSupported > 1 )
+            {
+                <FormGroup class="form-group">
+                    <Label>Maximum Players</Label>
+                    <Control>
+                        <SliderControl ShowRange=@true Min=@(2f) Max=@MaxPlayersSupported Value:bind=@Game.Menu.Lobby.MaxMembers />
+                    </Control>
+                </FormGroup>
+            }
+        </div>
+
+        <a class="button" onclick=@Play>Start</a>
+        <a class="button" href="/">Return</a>
+    </div>
+</root>
+
+@code
+{
+    int MaxPlayersSupported { get; set; } = 1;
+    int MaxPlayers { get; set; } = 1;
+    Package MapPackage { get; set; }
+
+    void OnMapClicked()
+    {
+        Game.Overlay.ShowPackageSelector( "type:map sort:popular", OnMapSelected );
+        StateHasChanged();
+    }
+
+    void OnMapSelected( Package map )
+    {
+        MapPackage = map;
+        StateHasChanged();
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        MaxPlayersSupported = Game.Menu.Package.GetMeta<int>( "MaxPlayers", 2 );
+        MaxPlayers = MaxPlayersSupported;
+
+        MapPackage = await Package.FetchAsync( "csdev.pl8_empty", false );
+        StateHasChanged();
+    }
+
+    async Task Play()
+    {
+        await Game.Menu.StartServerAsync( MaxPlayers, $"My game", MapPackage.FullIdent );
+    }
+
+    protected override int BuildHash()
+    {
+        return HashCode.Combine( MaxPlayers, MapPackage );
+    }
+}

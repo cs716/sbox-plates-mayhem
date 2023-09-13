@@ -1,0 +1,53 @@
+﻿@using System
+@using Sandbox.UI;
+
+@inherits Sandbox.UI.Panel
+@attribute [StyleSheet]
+
+
+<root>
+	<label class="notificationLabel" @ref=notificationLabel>Link Copied!</label>
+	<div class="badges">
+		<a onclick=@OpenDiscordLink class="button circle badge discord"></a>
+		<a onclick=@OpenGithubLink class="button circle badge github"></a>
+	</div>
+</root>
+
+
+@code {
+
+	private Label notificationLabel { get; set; }
+	private Sandbox.RealTimeUntil notificationTTL { get; set; }
+
+	public void OpenDiscordLink()
+	{
+		displayNotification();
+		Clipboard.SetText( "https://discord.gg/Z67fnvQukc" );
+	}
+
+	public void OpenGithubLink()
+	{
+		displayNotification();
+		Clipboard.SetText( "https://github.com/cs716/sbox-plates-mayhem" );
+	}
+
+	private void displayNotification()
+	{
+		notificationTTL = 5f;
+		notificationLabel.Style.Opacity = 1f;
+	}
+
+	protected override int BuildHash()
+	{
+		return HashCode.Combine( notificationLabel?.Style.Opacity );
+	}
+
+	public override void Tick()
+	{
+		if ( notificationTTL && notificationLabel.IsVisible )
+			notificationLabel.Style.Opacity = 0f;
+		
+		base.Tick();
+	}
+
+}

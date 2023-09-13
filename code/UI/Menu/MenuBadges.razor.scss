@@ -1,0 +1,57 @@
+﻿MenuBadges {
+  flex-direction: column;
+  z-index: 100;
+  font-family: RussoOne;
+  color: #FFF;
+  bottom: 25px;
+  right: 25px;
+  position: absolute;
+  justify-content: space-around; 
+  
+  label.notificationLabel {
+    opacity: 0;
+    right: 10px;
+    bottom: 80px;
+    position: absolute;
+    z-index: 999;
+    text-shadow: 3px 3px 8px black;
+    animation-delay: 0.8s;
+    animation-direction: normal;
+    animation-iteration-count: 1;
+    //animation: upFadeOut 0.8s 1 forwards;
+  }
+  
+  .badge {
+    margin-left: 15px;
+    
+    &.discord {
+      
+      background-image: url(https://media.discordapp.net/attachments/1151230147958157332/1151252064991727666/image.png?width=671&height=671);
+    }
+    
+    &.github {
+      background-image: url(https://media.discordapp.net/attachments/1151230147958157332/1151252546682364025/image.png?width=671&height=671);
+    }
+
+    &.button
+    {
+      &:hover
+      {
+        sound-in: ui.button.over;
+        cursor: pointer;
+        transform: scale(1.1);
+      }
+
+      &:active
+      {
+        sound-in: ui.button.press;
+      }
+    }
+  }
+}
+
+@keyframes upFadeOut {
+  0% { opacity: 1; bottom: 40px; }
+  50% { opacity: 1; bottom: 40px; }
+  100% { opacity: 0; bottom: 100px; }
+}

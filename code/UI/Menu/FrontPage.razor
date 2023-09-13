@@ -1,0 +1,40 @@
+@using Sandbox;
+@using System.Linq;
+@using Sandbox.UI;
+
+<root>
+    <div class="game-title">
+        @Game.Menu.Package.Title
+    </div>
+
+    <div class="controls">
+        @if (Game.InGame)
+        {
+            <a class="button" onclick=@LeaveGame>Leave</a>
+        }
+        else
+        {
+            <a class="button" @onclick=@CreateLobbyAsync>Create Lobby</a>
+
+            <a class="button" href="/lobby/list">Find Games (@(Game.Menu.Lobbies.Any() ? Game.Menu.Lobbies.Count().ToString() : "None")) </a>
+        }
+
+        <a class="button" @onclick=@Game.Menu.Close>Quit</a>
+    </div>
+</root>
+
+@code
+{
+	public async void CreateLobbyAsync()
+	{
+		await Game.Menu.CreateLobbyAsync( 64, "game", true );
+		Game.Menu.Lobby.Map = "csdev.pl8_empty";
+		
+		this.Navigate( "/lobby/active" );
+	}
+	
+    void LeaveGame()
+    {
+        Game.Menu.LeaveServer( "Leaving" );
+    }
+}

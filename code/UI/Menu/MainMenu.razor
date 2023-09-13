@@ -1,0 +1,64 @@
+@using System;
+@using Sandbox;
+@using Sandbox.UI;
+
+@inherits Sandbox.UI.NavHostPanel
+@implements Sandbox.Menu.IGameMenuPanel
+@attribute [StyleSheet]
+
+<root style="flex-direction: column;">
+	<div class="badge logo logoPos lg circle" />
+	<div class="background"/>
+	<div class="navigator-canvas" slot="navigator-canvas"/>
+	<MenuBadges />
+</root>
+
+@code
+{
+	SoundHandle MenuMusic; 
+	
+    public MainMenu()
+    {
+        DefaultUrl = "/";
+
+        AddDestination( "/", typeof( FrontPage ) );
+        AddDestination( "/setup", typeof( SetupGame ) );
+
+        AddDestination( "/lobby/list", typeof( LobbyBrowser ) );
+        AddDestination( "/lobby/active", typeof( ActiveLobby ) );
+
+        BindClass( "ingame", () => Game.InGame );
+    }
+
+	void UpdateMusic()
+	{
+		if ( Game.InGame )
+		{
+			Log.Info( "Stopping menu music .." );
+			MenuMusic.Stop(true);
+			return;
+		}
+
+		if ( !MenuMusic.IsPlaying )
+		{
+			MenuMusic = Audio.Play( "sounds/menu/mainmenu.music.sound" );
+		}
+	}
+
+    [GameEvent.Menu.ServerJoined]
+    public void OnServerJoined() => Navigate( "/" );
+
+    [GameEvent.Menu.ServerLeave]
+    public void OnServerLeave() => Navigate ("/" );
+
+	public override void Tick()
+	{
+		UpdateMusic();
+		base.Tick();
+	}
+
+	protected override int BuildHash()
+    {
+        return HashCode.Combine( Game.InGame, Game.Menu.Lobby, Game.Menu.Lobby?.Map );
+    }
+}
