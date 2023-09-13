@@ -1,12 +1,13 @@
 ﻿@namespace PlatesGame.UI
 @using System
+@using Sandbox
 @using Sandbox.UI
 @inherits Sandbox.UI.Panel 
 
 @attribute [StyleSheet]
 
 <root>
-	@if ( GetConnectedPlayers() < GameConfig.MinimumPlayers )
+	@if ( GetConnectedPlayers() < 10 )
 	{
 		<label style="font-size: 48px;" class="title white hourglass"></label>
 		<label class="title white mainText shadow">Waiting for @(GameConfig.MinimumPlayers - GetConnectedPlayers()) more player@(GameConfig.MinimumPlayers - GetConnectedPlayers() > 1 ? "s" : "") to begin ..</label>
