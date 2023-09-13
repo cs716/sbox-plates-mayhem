@@ -1,12 +1,12 @@
 {
-  "UI": false,
-  "Volume": "1.00,1.00,0",
+  "UI": true,
+  "Volume": "0.50,0.50,0",
   "Pitch": "1.00,1.00,0",
-  "Decibels": 70,
+  "Decibels": 35,
   "SelectionMode": "Random",
   "Sounds": [
     "sounds/menu/notification.show.vsnd"
   ],
-  "MaximumDistance": 1143.9335,
-  "MinimumDistance": 57.196674
+  "MaximumDistance": 309.98337,
+  "MinimumDistance": 15.499168
 }
