@@ -119,15 +119,17 @@ public partial class PlatesPlayer : AnimatedEntity
 
 		SetupPhysicsFromAABB( PhysicsMotionType.Keyframed, Hull.Mins, Hull.Maxs );
 
-		if (Game.IsServer) 
+		if ( Game.IsServer )
+		{
 			PlayerModifiers = new List<PlayerModifier>();
+		}
 	}
 
 	public void Respawn()
 	{
 		Components.Create<PawnController>();
 		Components.Create<PawnAnimator>();
-		Components.GetOrCreate<PawnCamera>();
+		Components.Create<PawnCamera>();
 		SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
 		PlayerModifiers.Clear();
 		Health = 100f;
@@ -188,7 +190,7 @@ public partial class PlatesPlayer : AnimatedEntity
 		PlatesGame.CurrentState?.OnPlayerDeath(this);
 		
 		OwnedPlate?.Kill();
-		Components.GetOrCreate<SpectatorCamera>();
+		Components.Create<SpectatorCamera>();
 	}
 
 	public void DressFromClient( IClient cl )

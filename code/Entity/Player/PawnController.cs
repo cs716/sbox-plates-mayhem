@@ -20,7 +20,7 @@ public class PawnController : EntityComponent<PlatesPlayer>
 		ControllerEvents.Clear();
 
 		var movement = Entity.Tags.Has("input_disabled") ? Vector3.Zero : Entity.InputDirection.Normal;
-		var angles = Camera.Rotation.Angles().WithPitch( 0 );
+		var angles = Entity.Rotation.Angles().WithPitch( 0 );
 		var moveVector = Rotation.From( angles ) * movement * 320f;
 		var groundEntity = CheckForGround();
 

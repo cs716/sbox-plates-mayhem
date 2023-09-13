@@ -12,6 +12,23 @@ public class PawnCamera : BasePlayerCamera
 	private float OrbitDistance = 400f;
 	private float TargetOrbitDistance = 400f;
 	private Angles OrbitAngles = Angles.Zero;
+	
+	protected static Vector3 IntersectPlane( Vector3 pos, Vector3 dir, float z )
+	{
+		var a = (z - pos.z) / dir.z;
+		return new Vector3( dir.x * a + pos.x, dir.y * a + pos.y, z );
+	}
+	
+	protected static Rotation LookAt( Vector3 targetPosition, Vector3 position )
+	{
+		var targetDelta = (targetPosition - position);
+		var direction = targetDelta.Normal;
+
+		return Rotation.From( new Angles(
+			((float)Math.Asin( direction.z )).RadianToDegree() * -1.0f,
+			((float)Math.Atan2( direction.y, direction.x )).RadianToDegree(),
+			0.0f ) );
+	}
 
 	public override void Update()
 	{
@@ -28,7 +45,7 @@ public class PawnCamera : BasePlayerCamera
 		var targetPos = Camera.Position + Camera.Rotation.Backward * OrbitDistance;
 
 		Camera.Position = targetPos;
-		Camera.FieldOfView = 90f;
+		Camera.FieldOfView = 70f;
 		Camera.FirstPersonViewer = null;
 
 		Sound.Listener = new Transform { Position = pawn.AimRay.Position, Rotation = pawn.EyeRotation };
