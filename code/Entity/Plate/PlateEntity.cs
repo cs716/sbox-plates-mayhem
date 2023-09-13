@@ -38,6 +38,7 @@ public sealed partial class PlateEntity : MeshEntity
         var newScale = new Vector3(size, size, 0.01f);
         scale = newScale;
         ToScale = newScale;
+        
     }
 
     public void AddModifier( PlateModifier modifier )
