@@ -84,14 +84,14 @@
         await Game.Menu.StartServerAsync( Game.Menu.Lobby.MaxMembers, $"{Game.Menu.Lobby.Owner.Name}'s game", "csdev.pl8_empty" );
     }
 
-	async Task Ready()
+	void Ready()
 	{
-		@foreach (var member in Lobby.Members)
-		{
-			if ( member.IsMe )
-				Log.Info( "Ready: " + member.Id );
-		}
-	//Lobby.SetData($"ready_{Game.LocalClient.Name}", "true" );
+		Lobby.SetData( $"ready_{Game.SteamId}", "true" );
+	}
+
+	void UnReady()
+	{
+		Lobby.SetData( $"ready_{Game.SteamId}", "false" );
 	}
 
     protected override void OnParametersSet()

@@ -16,14 +16,13 @@
             <i class="with-click" tooltip="Refresh lobbies" @onclick=@Refresh>refresh</i>
         </div>
 
-        <div class="scroll">
-            @foreach ( var lobby in Game.Menu.Lobbies )
-            {
-                <a class="button" @onclick=@( () => JoinLobby( lobby ) ) >@(lobby.Owner.Name)'s lobby (@lobby.MemberCount/@lobby.MaxMembers)</a>
-            }
-        </div>
-
-        <div class="spacer" />
+	    <div class="scroll">
+		    @foreach ( var lobby in Game.Menu.Lobbies )
+		    {
+			    <a class="button" @onclick=@( () => JoinLobby( lobby ) )>@(lobby.Owner.Name)'s lobby (@lobby.MemberCount/@lobby.MaxMembers)</a>
+		    }
+	    </div>
+	    <div class="spacer" />
 
         <a class="button" @onclick=@CreateLobbyAsync>Create Lobby</a>
         <a class="button" href="/">Return</a>

@@ -27,6 +27,17 @@ MainMenu
         z-index: -1;
     }
     
+    .serverList {
+        flex-direction: column;
+        flex-flow: row wrap;
+        transition: 0.5s;
+        box-sizing: border-box;
+        
+        div {
+            gap: 10px 80px;
+        }
+        
+    }    
     .logoPos {
         top: 25px;
         left: 25px;
