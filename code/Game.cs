@@ -1,6 +1,7 @@
 ﻿using Sandbox;
 using Sandbox.Diagnostics;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using PlatesGame.UI;
 
@@ -111,9 +112,10 @@ partial class PlatesGame : GameManager
 		
 		var pawn = new PlatesPlayer();
 		client.Pawn = pawn;
+		//if ( client.IsBot )
+			//pawn.Tags.Add( "input_disabled" );
+
 		pawn.DressFromClient( client );
-		if ( client.IsBot )
-			pawn.Tags.Add( "input_disabled" );
 		
 		CurrentState?.OnPlayerConnect( client );
 	}
