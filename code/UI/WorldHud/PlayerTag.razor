@@ -56,7 +56,7 @@
 	{
 		base.Tick();
 
-		if ( Player.LifeState != LifeState.Alive )
+		if ( !IsValid || Player.LifeState != LifeState.Alive )
 			return;
 
 		if ( Position.Distance( Camera.Position ) >= 1500f )
