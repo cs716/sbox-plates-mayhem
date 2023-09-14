@@ -45,7 +45,7 @@ public class BarrelRainEvent : BaseEvent
 		if ( rand != 1 )
 			return;
 
-		var barrel = new BarrelEntity
+		var barrel = new FallingProp
 		{
 			Position = new Vector3( Random.Shared.Int(-1500,1500), Random.Shared.Int(-1500,1500), 5000 ),
 			Rotation = Rotation.From(new Angles(Random.Shared.Float()*360,Random.Shared.Float()*360,Random.Shared.Float()*360)),
