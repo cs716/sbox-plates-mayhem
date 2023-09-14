@@ -14,10 +14,11 @@ public class FallingProp : Prop
 		Tags.Add( "trigger", "solid" );
 		SetupPhysicsFromModel( PhysicsMotionType.Keyframed );
 	}
-	private float BlastRadius { get; set; } = 80f;
-	private float BaseDamage { get; set; } = 80f;
 
-	private float BaseForce { get; set; } = 800f;
+	public float BlastRadius { get; set; } = 80f;
+	public float BaseDamage { get; set; } = 80f;
+
+	public float BaseForce { get; set; } = 800f;
 
 	private bool Exploded; 
 
@@ -34,6 +35,15 @@ public class FallingProp : Prop
 		if (Game.IsServer)
 		{
 			EnableDrawing = false;
+			DeleteAsync( 1f );
+		}
+	}
+
+	[GameEvent.Tick.Server]
+	public void OnTick()
+	{
+		if ( Position.z < -1000f )
+		{
 			DeleteAsync( 1f );
 		}
 	}

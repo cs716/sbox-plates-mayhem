@@ -26,6 +26,7 @@ public class EventManager
 		AddEvent( new ArenaHighGravityEvent() );
 		AddEvent( new ArenaLowGravityEvent() );
 		AddEvent( new BarrelRainEvent() );
+		AddEvent( new SkibidiRain() );
 		AddEvent( new GlassPlates() );
 		//AddEvent( new PoisonPlates() );
 
