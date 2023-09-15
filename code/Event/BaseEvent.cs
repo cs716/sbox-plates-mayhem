@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Runtime.Serialization;
 using Sandbox;
+using Sandbox.Services;
 
 namespace PlatesGame;
 
@@ -69,6 +71,16 @@ public abstract partial class BaseEvent : BaseNetworkable
 	{
 		PlatesGame.EventDetails.AffectedEntities.Clear();
 		HasExited = true;
+
+		if ( !Game.IsServer )
+		{
+			return;
+		}
+
+		foreach (var player in Players.GetLiving())
+		{
+			Stats.Increment(player?.Client, Stat.EventsSurvived, 1  );
+		}
 	}
 
 	public void Tick()

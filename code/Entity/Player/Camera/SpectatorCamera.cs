@@ -88,7 +88,7 @@ public class SpectatorCamera : BasePlayerCamera
 			? -1
 			: _currentFollowingPawn.NetworkIdent;
 		
-		var livingPlayers = Sandbox.Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive ).OrderBy(p => p.NetworkIdent ).ToList();
+		var livingPlayers = Players.GetLiving().OrderBy(p => p.NetworkIdent ).ToList();
 		var nextPlayer = livingPlayers.Where( p => p.NetworkIdent > currentId ).ToList();
 		if ( nextPlayer.Any() )
 		{
@@ -110,7 +110,7 @@ public class SpectatorCamera : BasePlayerCamera
 			? -1
 			: _currentFollowingPawn.NetworkIdent;
 		
-		var livingPlayers = Sandbox.Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive ).OrderByDescending(p => p.NetworkIdent ).ToList();
+		var livingPlayers = Players.GetLiving().OrderByDescending(p => p.NetworkIdent ).ToList();
 		var nextPlayer = livingPlayers.Where( p => p.NetworkIdent < currentId ).ToList();
 		if ( nextPlayer.Any() )
 		{

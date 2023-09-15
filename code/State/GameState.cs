@@ -25,8 +25,8 @@ public partial class GameState : BaseNetworkable
 	{
 		if ( Game.IsClient )
 			return;
-			
-		var livingPlayers = Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive );
+
+		var livingPlayers = Players.GetLiving();
 		var platesPlayers = livingPlayers as PlatesPlayer[] ?? livingPlayers.ToArray();
 		if ( !platesPlayers.Any() )
 		{

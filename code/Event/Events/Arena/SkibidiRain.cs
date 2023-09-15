@@ -90,7 +90,7 @@ public class SkibidiRain : BaseEvent
 			Health = 1f
 		};
 		if ( slamPlayerChance == 1 ) // Unlucky, Slam that shit on someones head
-			barrel.Position = (Vector3)Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState == LifeState.Alive )
+			barrel.Position = (Vector3)Players.GetLiving()
 				.OrderBy( x => Random.Shared.Double( 1, 100 ) ).First().Position.WithZ( 5000 );
 		barrel.Model = dropModel;
 		barrel.Tags.Add("eventProp");

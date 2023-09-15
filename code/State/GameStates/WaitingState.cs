@@ -25,7 +25,7 @@ public partial class WaitingState : GameState
 		
 		PlateManager.CreatePlates(Game.Clients);
 		
-		ReadyPlayers = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
+		ReadyPlayers = Players.GetLiving().Count();
 	}
 
 	public override void OnExit()
@@ -91,7 +91,7 @@ public partial class WaitingState : GameState
 			return;
 		
 		PlateManager.FindAndAssignPlate( client );
-		ReadyPlayers = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
+		ReadyPlayers = Players.GetLiving().Count();
 	}
 
 	public override void OnPlayerDisconnect( IClient client, NetworkDisconnectionReason reason )
@@ -103,12 +103,12 @@ public partial class WaitingState : GameState
 		{
 			plate.PlateOwner = null; 
 		}
-		ReadyPlayers = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
+		ReadyPlayers = Players.GetLiving().Count();
 	}
 
 	private static void StartRound()
 	{
-		foreach (var platesPlayer in Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive  ))
+		foreach (var platesPlayer in Players.GetLiving())
 		{
 			PlateManager.ReturnPlayerToPlate( platesPlayer );
 		}

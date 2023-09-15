@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Sandbox;
 using System.ComponentModel;
 using System.Linq;
+using Sandbox.Services;
 
 namespace PlatesGame;
 
@@ -191,6 +192,14 @@ public partial class PlatesPlayer : AnimatedEntity
 		
 		OwnedPlate?.Kill();
 		Components.Create<SpectatorCamera>();
+		if ( Game.IsClient )
+			Stats.Increment( Stat.Deaths, 1 );
+	}
+
+	[ConCmd.Client]
+	public static void GetEvents()
+	{
+		var stats = Stats.GetLocalPlayerStats( Game.Server.GameIdent );
 	}
 
 	public void DressFromClient( IClient cl )
@@ -245,8 +254,8 @@ public partial class PlatesPlayer : AnimatedEntity
 
 		return tr;
 	}
-	
-	TimeSince timeSinceLastFootstep = 0;
+
+	private TimeSince timeSinceLastFootstep = 0;
 	public override void OnAnimEventFootstep( Vector3 position, int foot, float volume )
 	{
 		if ( !Game.IsServer )

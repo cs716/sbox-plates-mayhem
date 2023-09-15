@@ -29,7 +29,7 @@ public sealed class PlayerSwapEvent : BaseEvent
 		PlayerPairs.Clear();
 		
 		EventDelay = Random.Shared.Float( 5f, 25f ); // Make it random so players don't just throw themselves off of their plates
-		var playerCount = Entity.All.OfType<PlatesPlayer>().Count( p => p.LifeState is LifeState.Alive );
+		var playerCount = Players.GetLiving().Count();
 		var maxImpacted = playerCount - (playerCount % 2);
 		var randomSwaps = Random.Shared.Int( MinAffected, maxImpacted );
 

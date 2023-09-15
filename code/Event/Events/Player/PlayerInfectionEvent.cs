@@ -19,7 +19,7 @@ public class PlayerInfectionEvent : BaseEvent
 		if ( Game.IsClient )
 			return;
 
-		var players = Entity.All.OfType<PlatesPlayer>().Where( p => p.LifeState is LifeState.Alive ).OrderBy( x => Random.Shared.Double( 1, 100 ) ).ToList();
+		var players = Players.GetLiving().OrderBy( x => Random.Shared.Double( 1, 100 ) ).ToList();
 		var numPlatesImpacted = Random.Shared.Int( MinAffected, Math.Clamp( players.Count, MinAffected, MaxAffected ) );
 		List<string> playerNames = new();
 		for ( var i = 0; i < numPlatesImpacted; i++ )

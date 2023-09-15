@@ -1,5 +1,6 @@
 ﻿using System;
 using Sandbox;
+using Sandbox.Services;
 
 namespace PlatesGame;
 
@@ -31,7 +32,17 @@ public partial class RoundEndState : GameState
 	public override void OnEnter()
 	{
 		base.OnEnter();
-		Log.Info($"Winner: {RoundWinner?.Client?.Name}!"  );
+
+		if ( !Game.IsServer )
+			return;
+
+		if ( !RoundWinner.IsValid || !RoundWinner.Client.IsValid )
+		{
+			return;
+		}
+
+		Stats.Increment( RoundWinner.Client, Stat.Wins, 1 );
+		Log.Info($"Winner: {RoundWinner.Client.Name}!"  );
 	}
 
 	public override void OnTick()
