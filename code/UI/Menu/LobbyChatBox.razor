@@ -1,0 +1,98 @@
+﻿@using Sandbox;
+@using System;
+@using System.Linq;
+@using System.Runtime.CompilerServices
+@using System.Threading.Tasks;
+@using Microsoft.VisualBasic
+@using Sandbox.Menu;
+@using Sandbox.UI;
+
+@inherits Sandbox.UI.Panel;
+@attribute [StyleSheet]
+
+<root onfocus=@Open>
+	<div @ref=ChatEntries class="entries canvas">
+		
+	</div>
+	<TextEntry placeholder="Message" @ref=Input onsubmit=@SendChatMessage onblur=@Close>
+		<label class="materialIcons">
+			send
+		</label>
+	</TextEntry>
+</root>
+
+
+@code {
+	ILobby Lobby => Game.Menu.Lobby;
+	Panel ChatEntries { get; set; }
+	TextEntry Input { get; set; }
+	Friend Owner => Lobby.Owner;
+	Sandbox.RealTimeSince LastMessageTime = 0f;
+	
+	public void OnChatMessageReceived( Friend sender, string message )
+	{
+		Log.Info($"(Chat) {sender.Id}: {message}"  );
+		
+		if ( message.StartsWith( "!*" ) ) // Command handling
+		{
+			if ( Owner.Id == sender.Id )
+			{
+				var cmd = message.Split( ' ' );
+				if ( cmd[0].Equals( "!*kick", StringComparison.CurrentCultureIgnoreCase ) && cmd[1].Equals( Game.SteamId.ToString(), StringComparison.CurrentCultureIgnoreCase ) )
+				{
+					Lobby.Leave();
+					this.Navigate( "/" );
+					Log.Info($"You have been kicked by {sender.Name}."  );
+				}
+			}
+		}
+		
+		LastMessageTime = 0f;
+
+		var entry = new ChatBoxEntry
+		{
+			Text = message,
+			Sender = sender
+		};
+
+		ChatEntries.AddChild( entry );
+	}
+
+	void Open()
+	{
+		AddClass( "open" );
+		Input.Focus();
+	}
+
+	void Close()
+	{
+		RemoveClass( "open" );
+		Input.Blur();
+	}
+
+	private ulong lobbyId; 
+	public override void Tick()
+	{
+		if ( Lobby == null )
+			return;
+		
+		if ( lobbyId != Lobby.Id )
+		{
+			Lobby.OnChatMessage = OnChatMessageReceived;
+			lobbyId = Lobby.Id;
+		}
+		
+		/*if ( Input.HasFocus && !HasClass( "open" ) )
+			Open();
+		else if ( !Input.HasFocus && HasClass( "open" ) )
+			Close();*/
+	}
+
+	private void SendChatMessage()
+	{
+		var msg = Input.Text;
+		Lobby.SendChat( msg );
+		Input.Text = string.Empty;
+		Input.Focus();
+	}
+}

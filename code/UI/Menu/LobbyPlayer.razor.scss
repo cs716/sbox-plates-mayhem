@@ -1,0 +1,17 @@
+﻿LobbyPlayer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between; 
+  padding: 10px;
+  margin: 5px;
+  min-height: 65px;
+  gap: 0px 10px;
+
+  img {
+    border-radius: 50%;
+    margin-right: 10px;
+    width: 64px;
+    height: auto;
+  }
+}

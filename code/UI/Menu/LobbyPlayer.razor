@@ -1,0 +1,48 @@
+﻿@using Sandbox;
+@using System;
+@using System.Linq;
+@using System.Threading.Tasks;
+@using Sandbox.Menu;
+@using Sandbox.UI;
+
+@inherits Sandbox.UI.Panel;
+@attribute [StyleSheet]
+
+@if ( Member.Id == 0 )
+{
+	return;
+}
+
+<root>
+	<img class="avatar" src="avatar:@Member.Id"/>
+	<label class="button">@(IsHost ? "(Host) " : "")@Member.Name</label>
+	@if ( Owner.IsMe && !Member.IsMe )
+	{
+		<label class="button" onclick=@KickPlayer>Kick</label>
+	}
+	@if ( Member.IsFriend )
+	{
+		<label style="color: green;" class="button">Friends</label>
+	}
+	else if ( Member.IsMe )
+	{
+		<label style="color: gold;" class="button">You</label>
+	} else {
+		<label style="color: green;" onclick=@Member.OpenAddFriendOverlay class="button">Add Friend</label>
+	}
+	
+</root>
+
+@code {
+
+	public Friend Member;
+	public bool IsHost;
+	public ILobby Lobby => Game.Menu.Lobby;
+	public Friend Owner => Lobby.Owner;
+
+	public void KickPlayer()
+	{
+		Lobby.SendChat( $"!*kick {Member.Id}" );
+	}
+
+}

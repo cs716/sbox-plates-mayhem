@@ -29,9 +29,7 @@ MainMenu
     
     .serverList {
         flex-direction: column;
-        flex-flow: row wrap;
         transition: 0.5s;
-        box-sizing: border-box;
         
         div {
             gap: 10px 80px;
@@ -201,17 +199,6 @@ i
     }
 }
 
-.avatar
-{
-    width: 64px;
-    height: 64px;
-
-    &:hover
-    {
-        border: 1px solid white;
-    }
-}
-
 .badge {
     height: 75px;
     width: 75px;
@@ -232,4 +219,16 @@ i
 
 .logo {
     background-image: url(https://media.discordapp.net/attachments/1151230147958157332/1151239527139135649/DiscordLogo3.jpg);
+}
+
+.materialIcons {
+    font-family: MaterialIconsRound;
+}
+
+.materialIconsRegular {
+    font-family: MaterialIcons;
+}
+
+.materialIconsOutlined {
+    font-family: MaterialIconsOutlined;
 }

@@ -18,7 +18,7 @@
                 <FormGroup class="form-group">
                     <Label>Maximum Players</Label>
                     <Control>
-                        <SliderControl ShowRange=@true Min=@(2f) Max=@MaxPlayersSupported Value:bind=@Game.Menu.Lobby.MaxMembers />
+                        <SliderControl ShowRange=@true Min=@(1f) Max=@MaxPlayersSupported Value:bind=@Game.Menu.Lobby.MaxMembers />
                     </Control>
                 </FormGroup>
             }
@@ -49,7 +49,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        MaxPlayersSupported = Game.Menu.Package.GetMeta<int>( "MaxPlayers", 2 );
+        MaxPlayersSupported = Game.Menu.Package.GetMeta<int>( "MaxPlayers", 1 );
         MaxPlayers = MaxPlayersSupported;
 
         MapPackage = await Package.FetchAsync( "beans.pl8_empty", false );
@@ -58,7 +58,7 @@
 
     async Task Play()
     {
-        await Game.Menu.StartServerAsync( MaxPlayers, $"My game", MapPackage.FullIdent );
+        await Game.Menu.StartServerAsync( MaxPlayers, $"My Game", MapPackage.FullIdent );
     }
 
     protected override int BuildHash()

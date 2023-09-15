@@ -1,0 +1,21 @@
+﻿@using Sandbox;
+@using System;
+@using System.Linq;
+@using System.Threading.Tasks;
+@using Sandbox.Menu;
+@using Sandbox.UI;
+
+@inherits Sandbox.UI.Panel;
+
+<root>
+	<img class="avatar" src="avatar:@Sender.Id" tooltip="@Sender.Name" />
+	<label class="name @(Sender.IsFriend ? "friend" : "") @(LobbyOwner.Id == Sender.Id ? "owner" : "")">@Sender.Name:</label>
+	<label class="content">@Text</label>
+</root>
+
+@code {
+	public Friend Sender;
+	public string Text;
+	public ILobby Lobby => Game.Menu.Lobby;
+	public Friend LobbyOwner => Lobby.Owner;
+}

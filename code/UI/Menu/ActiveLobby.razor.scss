@@ -1,0 +1,15 @@
+﻿ActiveLobby {
+  
+  .lobbyPlayers {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: scroll;
+    min-height: 300px;
+    max-height: 300px;
+  }
+  
+  .span {
+    margin-top: 100px;
+  }
+}

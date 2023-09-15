@@ -27,8 +27,9 @@
 {
 	public async void CreateLobbyAsync()
 	{
-		await Game.Menu.CreateLobbyAsync( 64, "game", true );
-		Game.Menu.Lobby.Map = "beans.pl8_empty";
+		var lobby = await Game.Menu.CreateLobbyAsync( 64, "game", true );
+		lobby.Title = $"{Game.UserName}'s Lobby";
+		lobby.Map = "beans.pl8_empty";
 		
 		this.Navigate( "/lobby/active" );
 	}
